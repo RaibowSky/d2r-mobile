@@ -33,4 +33,7 @@ void guest_thread_init(void) {
     uint8_t *tlr = calloc(1, TLR_SIZE);
     *(void **)(tlr + 0x1f8) = calloc(1, THREAD_OBJ_SIZE);   // 当前线程对象 | current thread object
     pthread_setspecific(g_keytlr, tlr);
+#ifdef __ANDROID__
+    dm_android_slots_sync();
+#endif
 }
