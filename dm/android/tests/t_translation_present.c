@@ -64,6 +64,7 @@ static void execute(const uint8_t *p) {
     }
 }
 void mtl_exec(const uint8_t *handle) {execute(handle);execs++;}
+void mtl_sub_index(const uint64_t *handles,int n) {(void)handles;(void)n;}
 void mtl_sub_commit_async(void) {atomic_fetch_add(&backend_fence,7);}
 uint64_t mtl_last_fence(void) {return atomic_load(&backend_fence);}
 int mtl_wait(uint64_t fence,uint64_t timeout) {

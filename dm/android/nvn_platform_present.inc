@@ -29,6 +29,7 @@ static void android_xrun(void *payload) {
     case ANDROID_X_SUBMIT:
         dm_android_nvn_work_check_thread();
         mtl_sub_begin();
+        mtl_sub_index(j->handles,j->n);
         for(int i=0;i<j->n;i++)mtl_exec((const uint8_t *)(uintptr_t)j->handles[i]);
         mtl_sub_commit_async();
         /* Vulkan retains bound program/target snapshots across submissions.

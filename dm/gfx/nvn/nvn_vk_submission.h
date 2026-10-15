@@ -80,6 +80,9 @@ typedef struct {
     int npass;
     FramebufferKey framebuffer_keys[LIMIT_WRITES];
     int active_pass,in_pass,depth_sampled,pass_depth_read_only;
+    unsigned pending_clear,pass_discard;
+    int flushing_clear;
+    VkClearValue clear_values[9]; /* NVN color slots 0..7, depth/stencil slot 8. */
     VkPipelineCreateFlags pass_feedback_flags,feedback_flags;
 
     DescEntry *desc_entries;

@@ -8,6 +8,7 @@
 #include <vulkan/vulkan.h>
 #include <android/native_window.h>
 #include "nvn_obj.h"
+#include "nvn_vk_attachment_plan.h"
 #include "nvn_translation_sync.h"
 #include "../../android/nvn_platform_clock.h"
 #include "nvn_mtl.h"
@@ -167,7 +168,7 @@ typedef struct {
     const prog_t *program; p_set_rt rt; va_st attributes[16]; vs_st streams[16]; NVNbufferRange vbuf[16];
     Range uniform[6][16],storage[6][16]; uint64_t tex[6][128],samp[6][128],img[6][32];
     color_st color; chmask_st mask; blend_st blend[8]; poly_st polygon; ds_st ds; ms_st ms;
-    VkViewport viewport; VkRect2D scissor; float blend_color[4]; uint64_t copy_stride;
+    VkViewport viewport; VkRect2D scissor; int scissor_set; float blend_color[4]; uint64_t copy_stride;
     const dpool_t *texture_pool,*sampler_pool; Range scratch; uint32_t stencil_compare[2],stencil_write[2],stencil_ref[2];
 } ReplayState;
 #include "nvn_vk_writeback_plan.h"
@@ -222,6 +223,10 @@ static struct {
 
     uint64_t profile_desc_alloc_ns,profile_desc_update_ns,profile_prep_ns,profile_lookup_ns,profile_pool_ns,profile_bind_ns,profile_render_ns,profile_present_ns;unsigned trace_meshes;
     int diag_barrier,diag_loadstore,disable_barrier_elision,disable_sample_copy_cache,barrier_stats,pass_timing;
+    int attachment_defaults,attachment_flags;
+    NvnAttachmentStats attachment_stats;
+    const uint8_t **attachment_ops;size_t attachment_count,attachment_capacity,attachment_pos;
+    int attachment_index_valid;
     uint32_t npacc;
 
     PassAcc pacc[128];char skip_ps[17];struct{char key[17];uint32_t draws;}hot[64];uint32_t nhot;int disable_desc_cache,disable_control_cache,diag_no_occlusion,diag_img_usage,barrier_pass_elide,pass_side_effects,diag_no_pass_deps,precise_sync,draw_store,xition_vertex;uint64_t profile_wait_elided,profile_hz_barriers,hz_count[8];int hz_diag,chunk_draws,chunk_log,profile_detail,seg_index,diag_skip_draws,diag_skip_xfer,diag_skip_class,diag_shape,enable_narrow_access,diag_fixed_desc,disable_wait_elision,want_cached,wb_stage_enabled,wb_stage_type,disable_setrt_skip,disable_subres,disable_pass_reuse,disable_cpu_uniform_snapshot;uint64_t setrt_total,setrt_same;char pass_desc[96],last_ps[20],last_uses[100];int last_count,last_barrier_bits;uint64_t pass_draws0;uint64_t gts_busy[4],gts_span[4],gts_gap[4],gts_chunks[4],pres_acq_ns,pres_fence_ns,pres_idle_ns,pres_submit_ns,seg_begin_ns,seg_record_ns[4],seg_wait_ns[4],seg_tail_ns[4],seg_draws[4],seg_chunks[4];uint64_t profile_chunks;uint32_t barrier_bits[256],barrier_kept[256],barrier_nopass,barrier_sidefx;uint32_t barrier_sites[4096],pass_end_sites[4096];
@@ -482,6 +487,8 @@ static void backend_init(void) {
     if(!S.desc_entries||!S.desc_arena||!G.control_cache)die("descriptor/control cache allocation",0);
     {const char *d=getenv("DM_DIAG_BARRIER");G.diag_barrier=d?atoi(d):0;G.barrier_stats=getenv("DM_BARRIER_STATS")!=NULL;
      const char *ls=getenv("DM_DIAG_LOADSTORE");G.diag_loadstore=ls?atoi(ls):0;
+     const char *cm=getenv("DM_VK_CLEAR_MERGE"),*se=getenv("DM_VK_STORE_ELIDE");
+     G.attachment_defaults=((!cm||strcmp(cm,"0"))?1:0)|((!se||strcmp(se,"0"))?2:0);
      if(G.diag_loadstore)fprintf(stderr,"[nvn-vulkan] DIAG_LOADSTORE mode=%d (timing diagnostic only; render output is intentionally incorrect)\n",G.diag_loadstore);
      if(G.diag_barrier)fprintf(stderr,"[nvn-vulkan] DIAG_BARRIER mode=%d (timing diagnostic only; GPU synchronization is intentionally incorrect)\n",G.diag_barrier);}
     VkCommandPoolCreateInfo ci={.sType=VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,.queueFamilyIndex=G.family,
@@ -633,6 +640,12 @@ static void occlusion_end(void) {
     }
 }
 static void chunk_ts_write(int end);
+static void pending_clears_flush(void);
+static _Atomic int attachment_override=-1;
+/* Diagnostic A/B control, latched at submit begin. Call between QueueFinish
+ * boundaries to compare the same workload within one process. */
+void dm_vk_attachment_config(int flags) { atomic_store(&attachment_override,flags<0?-1:flags&3); }
+void dm_vk_attachment_stats(NvnAttachmentStats *out) {pthread_mutex_lock(&G.lock);*out=G.attachment_stats;pthread_mutex_unlock(&G.lock);}
 static void pass_end_at(int line) { if(S.in_pass) { G.pass_end_sites[line&4095]++;if(G.profile_detail&&G.profile_frames==30)fprintf(stderr,"[nvn-vulkan] PASSLOG seg=%u rt=%s ps=%.6s n=%d bb=%#x uses=%s draws=%llu end_line=%d\n",G.seg_index,G.pass_desc,G.last_ps,G.last_count,G.last_barrier_bits,G.last_uses,(unsigned long long)(G.draws-G.pass_draws0),line);occlusion_end();vkCmdEndRenderPass(S.command); S.in_pass=0;
     if(S.pt_open){S.pt_open=0;vkCmdWriteTimestamp(S.command,VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,S.pass_ts,S.pt[S.npt].q0+1);S.pt[S.npt].q1=S.pt[S.npt].q0+1;S.pt[S.npt].draws=G.draws-S.pt_draws0;S.npt++;} } }
 #define pass_end() pass_end_at(__LINE__)
@@ -932,6 +945,8 @@ static void sub_begin_ctx(VkSubmission *ctx) {
     S.command=S.command_primary;S.chunk_index=0;S.chunk_mark=G.draws;G.seg_begin_ns=dm_android_nvn_clock_ns();
     S.phase=SUBMISSION_RECORDING;S.epoch=++G.recording_epoch;S.ticket=0;S.recorder=pthread_self();G.active=1;
     S.nwrites=S.nevents=S.ntemporary=S.npipeline=S.npass=S.nread_snapshots=S.ndirect_reads=0;S.in_pass=0;
+    S.pending_clear=0;S.flushing_clear=0;S.pass_discard=0;
+    {int flags=atomic_load(&attachment_override);G.attachment_flags=flags<0?G.attachment_defaults:flags;}
     S.ndriver_tables=0;memset(S.driver_table_slots,0,sizeof S.driver_table_slots);memset(S.last_driver_table,0,sizeof S.last_driver_table);
     S.nocc=S.ntime=0;S.ncounter=0;S.nview=0;S.nbuffer_view=0;memset(S.view_table,0,sizeof S.view_table);
     S.occlusion_reset_count=S.timestamp_reset_count=S.pass_reset_count=0;
@@ -973,7 +988,7 @@ typedef struct { unsigned reports;int candidate,traced;uint64_t wait_cpu,wait_st
 static uint64_t commit_after_gpu(CommitInfo ci,uint64_t waited);
 static CommitInfo commit_submit(void) {
     uint64_t prepare_cpu=dm_android_nvn_thread_cpu_ns();
-    if(!G.active) die("commit without begin",0); pass_end();
+    if(!G.active) die("commit without begin",0); pending_clears_flush();pass_end();
     if(getenv("DM_RESOURCE_STATS"))fprintf(stderr,"[nvn-vulkan] QUERY_RESET_STATS enabled=%d occ_reset=%u time_reset=%u pass_reset=%u occ_used=%u time_used=%u pass_used=%u\n",G.enable_query_reset_range,S.occlusion_reset_count,S.timestamp_reset_count,S.pass_reset_count,S.nocc,S.ntime,S.npt*2);
     /* Observed candidates only: resource lifetime and mapped-pool hazards have
      * not been solved. Internal counter reset/add operations are not reports. */
@@ -2190,6 +2205,32 @@ static void sub_chunk_flush(void) {
     CHECK(vkBeginCommandBuffer(S.command,&b));chunk_ts_write(0);
     nvn_vk_command_state_reset(&S.command_state);S.command_dirty=1;S.chunk_mark=G.draws;G.profile_chunks++;
 }
+static p_scissor attachment_scissor(void) {
+    return (p_scissor){G.state.scissor.offset.x,G.state.scissor.offset.y,
+        (int)G.state.scissor.extent.width,(int)G.state.scissor.extent.height};
+}
+/* A load clear covers only renderArea. Unequal attachment extents therefore
+ * keep the explicit whole-subresource clear; do not silently clip it. */
+static int clear_can_fold(void) {
+    if(!(G.attachment_flags&1)||S.flushing_clear||G.diag_shape||G.diag_loadstore)return 0;
+    unsigned width=0,height=0;NvnAttachmentKey keys[9];unsigned count=0;
+    for(int i=0;i<G.state.rt.n+(G.state.rt.depth?1:0);i++){
+        int depth=i==G.state.rt.n;const tex_t *t=depth?G.state.rt.depth:G.state.rt.color[i];if(!t)continue;
+        const view_t *v=depth?(G.state.rt.has_dview?&G.state.rt.dview:NULL):(G.state.rt.has_cview[i]?&G.state.rt.cview[i]:NULL);
+        if(t->d.target==NVN_TEXTURE_TARGET_3D)return 0;
+        NvnAttachmentKey key=nvn_attachment_key(t,v,0);if(key.level>=t->d.levels||key.level>=32)return 0;
+        unsigned w=t->d.width>>key.level,h=t->d.height>>key.level;if(!w)w=1;if(!h)h=1;
+        if(count&&(width!=w||height!=h))return 0;
+        for(unsigned j=0;j<count;j++)if(nvn_attachment_equal(key,keys[j]))return 0;
+        keys[count++]=key;width=w;height=h;
+    }
+    return count!=0;
+}
+static int attachment_store_dead(const tex_t *t,const view_t *v,unsigned plane) {
+    if(!(G.attachment_flags&2)||!G.attachment_index_valid||G.trace_frame||G.diag_loadstore||S.flushing_clear)return 0;
+    return nvn_store_dead(G.attachment_ops,G.attachment_count,G.attachment_pos,G.state.rt,
+        attachment_scissor(),G.state.scissor_set,nvn_attachment_key(t,v,plane));
+}
 static VkRenderPass render_begin(void) {
     p_set_rt *rt=&G.state.rt;if(rt->n<0 || rt->n>8 || (!rt->n&&!rt->depth))die("render targets",rt->n);
     int read_only=S.depth_sampled&&depth_read_only();
@@ -2205,7 +2246,9 @@ static VkRenderPass render_begin(void) {
     }
     pass_end();G.pass_side_effects=0;
     if(G.chunk_draws)sub_chunk_flush();
-    VkAttachmentDescription attachments[9];VkAttachmentReference color[8],depth;VkImageView views[9];uint32_t n=0,width=0,height=0;
+    VkAttachmentDescription attachments[9];VkAttachmentReference color[8],depth;VkImageView views[9];VkClearValue clears[9]={0};uint32_t n=0,width=0,height=0;
+    uint64_t clear_bpp=0,discard_bpp=0;
+    S.pass_discard=0;
     memset(attachments,0,sizeof(attachments));
     for(int i=0;i<rt->n;i++)color[i]=(VkAttachmentReference){VK_ATTACHMENT_UNUSED,VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL};
     for(int i=0;i<rt->n+(rt->depth?1:0);i++) {
@@ -2233,12 +2276,26 @@ static VkRenderPass render_begin(void) {
            .stencilLoadOp=G.diag_loadstore>=2?VK_ATTACHMENT_LOAD_OP_DONT_CARE:VK_ATTACHMENT_LOAD_OP_LOAD,
            .stencilStoreOp=G.diag_loadstore>=1?VK_ATTACHMENT_STORE_OP_DONT_CARE:VK_ATTACHMENT_STORE_OP_STORE,
            .initialLayout=layout,.finalLayout=layout};
+        unsigned clear_bit=is_depth?256u:1u<<i;
+        clears[n]=S.clear_values[is_depth?8:i];
+        if(S.pending_clear&clear_bit){attachments[n].loadOp=VK_ATTACHMENT_LOAD_OP_CLEAR;G.attachment_stats.clear_loads++;
+            clear_bpp+=is_depth?(t->format==VK_FORMAT_D16_UNORM?2:4):t->bpp;}
+        if(is_depth&&(S.pending_clear&512u)){attachments[n].stencilLoadOp=VK_ATTACHMENT_LOAD_OP_CLEAR;G.attachment_stats.clear_loads++;
+            clear_bpp++;}
+        if(attachment_store_dead(source,v,is_depth?1:0)){
+            attachments[n].storeOp=VK_ATTACHMENT_STORE_OP_DONT_CARE;S.pass_discard|=clear_bit;G.attachment_stats.discard_stores++;
+            discard_bpp+=is_depth?(t->format==VK_FORMAT_D16_UNORM?2:4):t->bpp;}
+        if(is_depth&&(aspect(t->format)&VK_IMAGE_ASPECT_STENCIL_BIT)&&attachment_store_dead(source,v,2)){
+            attachments[n].stencilStoreOp=VK_ATTACHMENT_STORE_OP_DONT_CARE;S.pass_discard|=512u;G.attachment_stats.discard_stores++;
+            discard_bpp++;}
         VkImageViewCreateInfo view={.sType=VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,.image=t->image,
             .viewType=VK_IMAGE_VIEW_TYPE_2D,.format=t->format,.subresourceRange=range};
         views[n]=submission_image_view(&view);
         if(is_depth)depth=(VkAttachmentReference){n,layout};else color[i]=(VkAttachmentReference){n,layout};n++;
     }
     if(!n)die("render targets have no bound attachment",rt->n);
+    G.attachment_stats.load_bytes_avoided+=(uint64_t)width*height*clear_bpp;
+    G.attachment_stats.store_bytes_avoided+=(uint64_t)width*height*discard_bpp;
     VkSubpassDescription sub={.pipelineBindPoint=VK_PIPELINE_BIND_POINT_GRAPHICS,.colorAttachmentCount=rt->n,.pColorAttachments=color,
         .pDepthStencilAttachment=rt->depth?&depth:NULL};
     VkSubpassDependency deps[3]={
@@ -2270,12 +2327,12 @@ static VkRenderPass render_begin(void) {
     }else G.profile_framebuffer_hits++;
     S.active_pass=index;G.pass_draws0=G.draws;{const tex_t *f0=rt->n>0?rt->color[0]:rt->depth;snprintf(G.pass_desc,sizeof G.pass_desc,"%ux%u c%d d%d s%llu",f0?f0->d.width:0,f0?f0->d.height:0,rt->n,rt->depth!=NULL,(unsigned long long)(f0?f0->serial:0));}
     VkRenderPassBeginInfo begin={.sType=VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,.renderPass=S.passes[index],.framebuffer=S.framebuffers[index],
-       .renderArea={{0,0},{(G.diag_shape&4)&&width>16?16:width,(G.diag_shape&4)&&height>16?16:height}}};
+       .renderArea={{0,0},{(G.diag_shape&4)&&width>16?16:width,(G.diag_shape&4)&&height>16?16:height}},.clearValueCount=n,.pClearValues=clears};
     if(S.pass_ts&&S.npt<500){uint32_t q=S.npt*2;query_reserve(S.pass_ts,&S.pass_reset_count,q,2,1024);vkCmdWriteTimestamp(S.command,VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,S.pass_ts,q);
         S.pt[S.npt].q0=q;S.pt[S.npt].w=width;S.pt[S.npt].h=height;S.pt[S.npt].n=rt->n;
         S.pt[S.npt].key=(rt->color[0]?rt->color[0]->serial:0)*1315423911ULL^(rt->depth?rt->depth->serial:0);S.pt_draws0=G.draws;S.pt_open=1;}
     if(G.precise_sync)hz_pass_sync();
-    vkCmdBeginRenderPass(S.command,&begin,VK_SUBPASS_CONTENTS_INLINE);S.in_pass=1;G.pass_count++;
+    vkCmdBeginRenderPass(S.command,&begin,VK_SUBPASS_CONTENTS_INLINE);S.pending_clear=0;S.in_pass=1;G.pass_count++;
     S.pass_feedback_flags=S.feedback_flags;S.pass_depth_read_only=read_only;
     return S.passes[index];
 }
@@ -2340,6 +2397,12 @@ static void draw(const p_draw *a,const p_draw_idx *idx) {
         G.state.stencil_compare[0],G.state.stencil_compare[1],G.state.stencil_write[0],G.state.stencil_write[1],G.state.stencil_ref[0],G.state.stencil_ref[1],
         G.state.ds.fail_f,G.state.ds.zfail_f,G.state.ds.zpass_f,G.state.ds.fail_b,G.state.ds.zfail_b,G.state.ds.zpass_b);
     S.feedback_flags=0;S.depth_sampled=0;S.nimage_uses=0;collect_image_uses(vs);collect_image_uses(ps);
+    /* A sampled/storage view can observe a clear before the attachment pass,
+     * including another mip of an image tracked with whole-image layouts. */
+    for(unsigned u=0;S.pending_clear&&u<S.nimage_uses;u++){
+        for(int i=0;i<8;i++)if((S.pending_clear&(1u<<i))&&G.state.rt.color[i]&&G.state.rt.color[i]->serial==S.image_uses[u].serial){pending_clears_flush();break;}
+        if((S.pending_clear&768u)&&G.state.rt.depth&&G.state.rt.depth->serial==S.image_uses[u].serial)pending_clears_flush();
+    }
     G.xition_vertex=0;for(unsigned i=0;i<vs->h.nb;i++)if(vs->b[i].kind==4||vs->b[i].kind==6)G.xition_vertex=1;
     uint64_t bind_started=prof_now();
     prepare_sampling_copies(vs);prepare_sampling_copies(ps);prepare_comparison_images(vs);prepare_comparison_images(ps);
@@ -2411,6 +2474,13 @@ static void draw(const p_draw *a,const p_draw_idx *idx) {
     memcpy(key.attributes,attributes,vs->h.na*sizeof(*attributes));memcpy(key.bindings,bindings,nbindings*sizeof(*bindings));
     key.depth_test=ds.depthTestEnable;key.depth_write=ds.depthWriteEnable;key.depth_compare=ds.depthCompareOp;key.stencil_test=ds.stencilTestEnable;
     key.stencil[0]=ds.front;key.stencil[1]=ds.back;memcpy(key.blend,blends,cb.attachmentCount*sizeof(*blends));key.pass=S.pass_key;
+    /* Load/store actions do not affect Vulkan render-pass compatibility.
+     * Keep the real pass descriptions intact, but avoid a new graphics PSO
+     * for each clear/discard combination. */
+    for(unsigned i=0;i<key.pass.count;i++){
+        key.pass.attachments[i].loadOp=key.pass.attachments[i].stencilLoadOp=VK_ATTACHMENT_LOAD_OP_LOAD;
+        key.pass.attachments[i].storeOp=key.pass.attachments[i].stencilStoreOp=VK_ATTACHMENT_STORE_OP_STORE;
+    }
     uint64_t hash=0;Pso pso,*cached=pso_lookup(&key,&hash);
     if(cached)pso=*cached;
     else{
@@ -2534,10 +2604,22 @@ static void copy_b2t(const p_copy_b2t *p) {
     vkCmdCopyBufferToImage(S.command,src->v.b,t->image,t->layout,1,&c);t->cpu_owned=0;tex_dirty(t);
 }
 static void clear_color(const p_clear_color *p) {
-    if(p->mask!=15 || p->index<0 || p->index>=G.state.rt.n)die("clear-color target/mask/view",p->mask);
+    if(p->mask!=15 || p->index<0 || p->index>=G.state.rt.n || !G.state.rt.color[p->index])die("clear-color target/mask/view",p->mask);
     VTexture *t=texture_get(G.state.rt.color[p->index],0);VkRect2D s=G.state.scissor;
     VkImageSubresourceRange range=attachment_range(&t->source,G.state.rt.has_cview[p->index]?&G.state.rt.cview[p->index]:NULL);
     unsigned w=t->width>>range.baseMipLevel,h=t->height>>range.baseMipLevel;if(!w)w=1;if(!h)h=1;
+    if(G.state.scissor_set&&(!s.extent.width||!s.extent.height))return;
+    int full=nvn_clear_full(&t->source,G.state.rt.has_cview[p->index]?&G.state.rt.cview[p->index]:NULL,attachment_scissor(),G.state.scissor_set);
+    if(full&&clear_can_fold()){
+        /* A previous pass whose store was omitted must end before the clear
+         * that justified that omission. Its replacement must get a new store. */
+        if(S.in_pass&&S.pass_discard)pass_end();
+        if(S.in_pass){VkClearAttachment a={.aspectMask=VK_IMAGE_ASPECT_COLOR_BIT,.colorAttachment=p->index};memcpy(a.clearValue.color.float32,p->rgba,16);
+            VkClearRect r={{{0,0},{w,h}},0,1};vkCmdClearAttachments(S.command,1,&a,1,&r);G.attachment_stats.inline_clears++;
+        }else{S.pending_clear|=1u<<p->index;memcpy(S.clear_values[p->index].color.float32,p->rgba,16);}
+        t->cpu_owned=0;tex_dirty(t);return;
+    }
+    pending_clears_flush();
     if(s.offset.x || s.offset.y || (s.extent.width && s.extent.width!=w) || (s.extent.height && s.extent.height!=h)) {
         if(s.offset.x<0 || s.offset.y<0)die("clear scissor negative",p->index);
         if((unsigned)s.offset.x>=w || (unsigned)s.offset.y>=h)return;
@@ -2546,7 +2628,7 @@ static void clear_color(const p_clear_color *p) {
         VkClearRect r={s,0,1};vkCmdClearAttachments(S.command,1,&a,1,&r);t->cpu_owned=0;tex_dirty(t);return;
     }
     all_barrier();texture_transition(t,VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);VkClearColorValue color;memcpy(color.float32,p->rgba,sizeof(p->rgba));
-    vkCmdClearColorImage(S.command,t->image,t->layout,&color,1,&range);t->cpu_owned=0;tex_dirty(t);
+    vkCmdClearColorImage(S.command,t->image,t->layout,&color,1,&range);G.attachment_stats.transfer_clears++;t->cpu_owned=0;tex_dirty(t);
 }
 static void clear_ds(const p_clear_ds *p) {
     if(G.trace_frame)fprintf(stderr,"[nvn-vulkan] CLEAR_DS depth=%g depth_mask=%#x stencil=%#x stencil_mask=%#x serial=%llu\n",p->depth,p->depth_mask,p->stencil,p->stencil_mask,
@@ -2558,6 +2640,19 @@ static void clear_ds(const p_clear_ds *p) {
     VkImageSubresourceRange range=attachment_range(&t->source,G.state.rt.has_dview?&G.state.rt.dview:NULL);range.aspectMask=flags;
     unsigned w=t->width>>range.baseMipLevel,h=t->height>>range.baseMipLevel;if(!w)w=1;if(!h)h=1;
     VkRect2D s=G.state.scissor;
+    if(G.state.scissor_set&&(!s.extent.width||!s.extent.height))return;
+    int full=nvn_clear_full(&t->source,G.state.rt.has_dview?&G.state.rt.dview:NULL,attachment_scissor(),G.state.scissor_set);
+    if(full&&clear_can_fold()){
+        if(S.in_pass&&(S.pass_discard||S.pass_depth_read_only))pass_end();
+        if(S.in_pass){VkClearAttachment a={.aspectMask=flags,.clearValue.depthStencil={p->depth,(uint32_t)p->stencil}};
+            VkClearRect r={{{0,0},{w,h}},0,1};vkCmdClearAttachments(S.command,1,&a,1,&r);G.attachment_stats.inline_clears++;
+        }else{
+            if(flags&VK_IMAGE_ASPECT_DEPTH_BIT){S.pending_clear|=256u;S.clear_values[8].depthStencil.depth=p->depth;}
+            if(flags&VK_IMAGE_ASPECT_STENCIL_BIT){S.pending_clear|=512u;S.clear_values[8].depthStencil.stencil=(uint32_t)p->stencil;}
+        }
+        t->cpu_owned=0;tex_dirty(t);return;
+    }
+    pending_clears_flush();
     if(s.offset.x || s.offset.y || (s.extent.width && s.extent.width!=w) || (s.extent.height && s.extent.height!=h)){
         if(s.offset.x<0 || s.offset.y<0)die("depth clear negative scissor",0);
         if((unsigned)s.offset.x>=w || (unsigned)s.offset.y>=h)return;
@@ -2566,7 +2661,23 @@ static void clear_ds(const p_clear_ds *p) {
         VkClearRect r={s,0,1};vkCmdClearAttachments(S.command,1,&a,1,&r);t->cpu_owned=0;tex_dirty(t);return;
     }
     all_barrier();texture_transition(t,VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);VkClearDepthStencilValue value={p->depth,(uint32_t)p->stencil};
-    vkCmdClearDepthStencilImage(S.command,t->image,t->layout,&value,1,&range);t->cpu_owned=0;tex_dirty(t);
+    vkCmdClearDepthStencilImage(S.command,t->image,t->layout,&value,1,&range);G.attachment_stats.transfer_clears++;t->cpu_owned=0;tex_dirty(t);
+}
+static void pending_clears_flush(void) {
+    if(!S.pending_clear)return;
+    unsigned mask=S.pending_clear;S.pending_clear=0;S.flushing_clear=1;
+    for(int i=0;i<8;i++)if(mask&(1u<<i)){
+        p_clear_color c={.index=i,.mask=15};memcpy(c.rgba,S.clear_values[i].color.float32,16);
+        /* The pending clear captured full coverage, regardless of subsequent
+         * scissor changes recorded before this observation boundary. */
+        VkRect2D saved=G.state.scissor;int set=G.state.scissor_set;G.state.scissor=(VkRect2D){0};G.state.scissor_set=0;
+        clear_color(&c);G.state.scissor=saved;G.state.scissor_set=set;
+    }
+    if(mask&768u){p_clear_ds c={S.clear_values[8].depthStencil.depth,(mask&256u)!=0,(int)S.clear_values[8].depthStencil.stencil,(mask&512u)?255:0};
+        VkRect2D saved=G.state.scissor;int set=G.state.scissor_set;G.state.scissor=(VkRect2D){0};G.state.scissor_set=0;
+        clear_ds(&c);G.state.scissor=saved;G.state.scissor_set=set;
+    }
+    S.flushing_clear=0;
 }
 static void clear_tex(const p_clear_tex *p) {
     const view_t *v=p->has_view?&p->view:NULL;
@@ -2670,6 +2781,12 @@ static void execute(const uint8_t *p,unsigned depth) {
         op_hdr h;memcpy(&h,p,sizeof(h));if(h.size<8 || h.size%8 || !command_memory_readable(&cursor,p,h.size))die("command record size",h.size);
         G.profile_command_records++;G.profile_command_bytes+=h.size;
         const uint8_t *a=p+8;
+        if(G.attachment_index_valid){
+            if(G.attachment_pos>=G.attachment_count||G.attachment_ops[G.attachment_pos]!=p)G.attachment_index_valid=0;
+            else G.attachment_pos++;
+        }
+        if(S.pending_clear && !nvn_attachment_state_op(h.op) && h.op!=OP_SET_RT &&
+           h.op!=OP_CLEAR_COLOR && h.op!=OP_CLEAR_DS && h.op!=OP_DRAW && h.op!=OP_DRAW_IDX)pending_clears_flush();
         switch(h.op) {
         case OP_END:return;
         case OP_BEGIN:break; /* Structural record; GPU binding state persists across command handles. */
@@ -2689,7 +2806,7 @@ static void execute(const uint8_t *p,unsigned depth) {
             pool_materialize(pool);vkCmdUpdateBuffer(S.command,pool->v.b,off,len,a+16);mark_write(dst,len);S.write_cpu[S.nwrites-1]=a+16;break;}
         case OP_SET_RT:payload_check(&h,sizeof(p_set_rt));G.setrt_total++;
             if(!memcmp(&G.state.rt,a,sizeof(p_set_rt))){G.setrt_same++;if(!G.disable_setrt_skip)break;}
-            pass_end();memcpy(&G.state.rt,a,sizeof(p_set_rt));break;
+            pending_clears_flush();pass_end();memcpy(&G.state.rt,a,sizeof(p_set_rt));break;
         case OP_CLEAR_COLOR:payload_check(&h,sizeof(p_clear_color));clear_color((const p_clear_color *)a);break;
         case OP_CLEAR_DS:payload_check(&h,sizeof(p_clear_ds));clear_ds((const p_clear_ds *)a);break;
         case OP_VIEWPORTS:{payload_check(&h,sizeof(p_viewports));const p_viewports *v=(const void *)a;if(v->first || v->n!=1)die("multiple viewports",v->n);
@@ -2698,7 +2815,7 @@ static void execute(const uint8_t *p,unsigned depth) {
             G.state.viewport.x=v->v[0][0];G.state.viewport.y=v->v[0][1];
             G.state.viewport.width=v->v[0][2];G.state.viewport.height=v->v[0][3];break;}
         case OP_SCISSOR:{payload_check(&h,sizeof(p_scissor));const p_scissor *s=(const void *)a;if(s->x<0||s->y<0||s->w<0||s->h<0)die("scissor bounds",s->x);
-            G.state.scissor=(VkRect2D){{s->x,s->y},{s->w,s->h}};break;}
+            G.state.scissor=(VkRect2D){{s->x,s->y},{s->w,s->h}};G.state.scissor_set=1;break;}
         case OP_DEPTH_RANGE:{payload_check(&h,sizeof(p_depth_range));const p_depth_range *d=(const void *)a;G.state.viewport.minDepth=d->n;G.state.viewport.maxDepth=d->f;break;}
         case OP_BIND_PROGRAM:payload_check(&h,sizeof(p_bind_program));G.state.program=((const p_bind_program *)a)->prog;break;
         case OP_BIND_STATE:{payload_check(&h,sizeof(p_bind_state));const p_bind_state *b=(const void *)a;switch(b->kind){
@@ -2827,7 +2944,36 @@ void mtl_exec(const uint8_t *handle) {
     if(--replay_cpu_depth==0){G.profile_replay_cpu_ns+=dm_android_nvn_thread_cpu_ns()-replay_cpu_started;G.profile_replay_calls++;}
 }
 void mtl_exec_rest(const uint64_t *handles,int n) { (void)handles;(void)n; } /* Optimization-only lookahead; replay order is unchanged. */
-void mtl_sub_index(const uint64_t *handles,int n) { (void)handles;(void)n; } /* No attachment store-elision optimizer in this backend. */
+/* Upstream sdx_walk ordering, with Vulkan pool bounds and a bounded index.
+ * Allocation/capacity failures disable the optimization, never discard data. */
+static void attachment_index_walk(const uint8_t *p,unsigned depth) {
+    if(depth>32){G.attachment_index_valid=0;return;}
+    CommandMemoryCursor cursor={0};
+    for(unsigned guard=0;guard<1000000&&G.attachment_index_valid;guard++){
+        if(!command_memory_readable(&cursor,p,8)){G.attachment_index_valid=0;return;}
+        op_hdr h;memcpy(&h,p,8);
+        if(h.size<8||h.size%8||!command_memory_readable(&cursor,p,h.size)){G.attachment_index_valid=0;return;}
+        if(G.attachment_count==G.attachment_capacity){
+            size_t capacity=G.attachment_capacity?G.attachment_capacity*2:4096;
+            if(capacity>262144){G.attachment_index_valid=0;return;}
+            const uint8_t **ops=realloc(G.attachment_ops,capacity*sizeof(*ops));
+            if(!ops){G.attachment_index_valid=0;return;}G.attachment_ops=ops;G.attachment_capacity=capacity;
+        }
+        G.attachment_ops[G.attachment_count++]=p;
+        if(h.op==OP_END)return;
+        if(h.op==OP_JUMP||h.op==OP_CALL){
+            if(h.size<16){G.attachment_index_valid=0;return;}
+            const uint8_t *next;memcpy(&next,p+8,8);
+            if(h.op==OP_JUMP){p=next;continue;}attachment_index_walk(next,depth+1);
+        }
+        p+=h.size;
+    }
+    G.attachment_index_valid=0;
+}
+void mtl_sub_index(const uint64_t *handles,int n) {
+    G.attachment_count=G.attachment_pos=0;G.attachment_index_valid=(G.attachment_flags&2)!=0;
+    for(int i=0;i<n&&G.attachment_index_valid;i++)attachment_index_walk((const uint8_t *)(uintptr_t)handles[i],0);
+}
 
 static void swapchain_destroy_locked(void);
 void dm_vk_set_window(void *native) {
