@@ -259,6 +259,9 @@ JNIEXPORT jint JNICALL Java_org_d2r_binaryprobe_GameActivity_nativeConfigure(JNI
     unsetenv("DM_DISABLE_ASYNC_COMMIT");
     path(driver_option,sizeof driver_option,port_root,"diagnostics/disable-async-commit");
     if(access(driver_option,F_OK)==0)setenv("DM_DISABLE_ASYNC_COMMIT","1",1);
+    unsetenv("DM_NVN_SYNC");
+    path(driver_option,sizeof driver_option,port_root,"diagnostics/nvn-sync");
+    if(access(driver_option,F_OK)==0)setenv("DM_NVN_SYNC","1",1);
     unsetenv("DM_CONFLICT_WAIT_ALL");
     path(driver_option,sizeof driver_option,port_root,"diagnostics/conflict-wait-all");
     if(access(driver_option,F_OK)==0)setenv("DM_CONFLICT_WAIT_ALL","1",1);

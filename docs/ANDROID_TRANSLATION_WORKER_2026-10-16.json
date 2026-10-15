@@ -1,0 +1,215 @@
+{
+  "recorded_at_utc": "2026-10-15T17:19:56.106868+00:00",
+  "base_commit": "5924a97d72ae1d3738aadd0f29343de40ada44c0",
+  "branch": "codex/android-measured-optimizations",
+  "device_contacted": false,
+  "gpu_executed": false,
+  "performance_measured": false,
+  "build": {
+    "passed": true,
+    "ndk": "27.2.12479018",
+    "abi": "arm64-v8a",
+    "api": 29,
+    "configuration": "RelWithDebInfo",
+    "command": "cmake --build D:/AndroidSwitch/build/android-measured-optimizations -j 6",
+    "artifact": "D:\\AndroidSwitch\\build\\android-measured-optimizations\\libd2r_mobile_android.so",
+    "artifact_bytes": 2787024,
+    "artifact_sha256": "2f0ff07d7b3e79549422ca832b2cd1ff193863999a0af569fd688adda800b920",
+    "elf_class": "ELF64",
+    "elf_machine": "AArch64",
+    "translation_symbols_verified": true,
+    "log_sha256": "e6c60656fe021f14b92f98259905a4a36a1cc4921208d529e13cab553fe0611c"
+  },
+  "translation": {
+    "passed": true,
+    "device_contacted": false,
+    "gpu_executed": false,
+    "sanitizers": "address,undefined",
+    "tests": [
+      {
+        "test": "queue",
+        "mode": "normal",
+        "arguments": [],
+        "passed": true,
+        "command": [
+          "/mnt/d/AndroidSwitch/build/android-measured-optimizations/translation-checks/queue-normal"
+        ],
+        "log": "queue-normal-.log",
+        "stdout": "TRANSLATION_BACKPRESSURE capacity=32 jobs=33 poll_and_timeout=passed\nTRANSLATION_FIFO mode=0 producers=4 jobs=20000 passed=1\nTRANSLATION_FIFO mode=1 producers=4 jobs=20000 passed=1\nTRANSLATION_FIFO mode=2 producers=4 jobs=20000 passed=1\nTRANSLATION_QUEUE passed=1 ordered_jobs=60033 modes=3"
+      },
+      {
+        "test": "adapter",
+        "mode": "normal",
+        "arguments": [
+          "0"
+        ],
+        "passed": true,
+        "command": [
+          "/mnt/d/AndroidSwitch/build/android-measured-optimizations/translation-checks/adapter-normal",
+          "0"
+        ],
+        "log": "adapter-normal-0.log",
+        "stdout": "TRANSLATION_ADAPTER mode=worker handles=owned fences=backend timeout=bounded present=snapshot lifecycle=drained hints=same_thread passed=1"
+      },
+      {
+        "test": "adapter",
+        "mode": "normal",
+        "arguments": [
+          "1"
+        ],
+        "passed": true,
+        "command": [
+          "/mnt/d/AndroidSwitch/build/android-measured-optimizations/translation-checks/adapter-normal",
+          "1"
+        ],
+        "log": "adapter-normal-1.log",
+        "stdout": "TRANSLATION_ADAPTER mode=sync handles=owned fences=backend timeout=bounded present=snapshot lifecycle=drained hints=same_thread passed=1"
+      },
+      {
+        "test": "queue",
+        "mode": "sanitized",
+        "arguments": [],
+        "passed": true,
+        "command": [
+          "/mnt/d/AndroidSwitch/build/android-measured-optimizations/translation-checks/queue-sanitized"
+        ],
+        "log": "queue-sanitized-.log",
+        "stdout": "TRANSLATION_BACKPRESSURE capacity=32 jobs=33 poll_and_timeout=passed\nTRANSLATION_FIFO mode=0 producers=4 jobs=20000 passed=1\nTRANSLATION_FIFO mode=1 producers=4 jobs=20000 passed=1\nTRANSLATION_FIFO mode=2 producers=4 jobs=20000 passed=1\nTRANSLATION_QUEUE passed=1 ordered_jobs=60033 modes=3"
+      },
+      {
+        "test": "adapter",
+        "mode": "sanitized",
+        "arguments": [
+          "0"
+        ],
+        "passed": true,
+        "command": [
+          "/mnt/d/AndroidSwitch/build/android-measured-optimizations/translation-checks/adapter-sanitized",
+          "0"
+        ],
+        "log": "adapter-sanitized-0.log",
+        "stdout": "TRANSLATION_ADAPTER mode=worker handles=owned fences=backend timeout=bounded present=snapshot lifecycle=drained hints=same_thread passed=1"
+      },
+      {
+        "test": "adapter",
+        "mode": "sanitized",
+        "arguments": [
+          "1"
+        ],
+        "passed": true,
+        "command": [
+          "/mnt/d/AndroidSwitch/build/android-measured-optimizations/translation-checks/adapter-sanitized",
+          "1"
+        ],
+        "log": "adapter-sanitized-1.log",
+        "stdout": "TRANSLATION_ADAPTER mode=sync handles=owned fences=backend timeout=bounded present=snapshot lifecycle=drained hints=same_thread passed=1"
+      }
+    ],
+    "source_sha256": {
+      "dm/android/nvn_translation_queue.h": "71cff4089596e08e7ae05a95d815976765538a48bf34afc294fb54d8a31aff7a",
+      "dm/android/nvn_translation_sync.h": "31af5cf29f1637ac01088fb7dab34c6a8e9a1f405a3c9eed2685c2b1ecba5bf0",
+      "dm/android/nvn_translation_queue.c": "b45ed4fbaf0745900c2bf5ba6ebb6526aa22010a792c2d7a792981630a4109bc",
+      "dm/android/nvn_platform_present.inc": "55f54c5e3099861f75e83da13c7fe070ca4ad016b7b1e1c4be4d8f03803c2c0f",
+      "dm/android/nvn_platform_clock.c": "abab6d8604afb571fa83754e0db4873a86704a9f0b9e91e5abd0585fcd0bcdab",
+      "dm/android/nvn_platform_clock.h": "4452727b8305d39e38e724e1fcf6e9eab493ee23782709cb6adde587367b8136",
+      "dm/android/app_jni.c": "72a9efd45e7420b2c9898868bf11cdd964242c1276b151e7c85b9c9d836ba7cc",
+      "dm/android/CMakeLists.txt": "c42eaa77b35d144336955e050e52019d5195d46a66152e595a53780e57645e46",
+      "dm/gfx/nvn/hle_nvn.c": "80330bef5ee2069f349bb230b69d1430db72fa1ead504d3d29192df56f1fb595",
+      "dm/gfx/nvn/nvn_vk.c": "5ddb5d8096c904787bf730eef0a3fced686c928bbc3b80b88060444c8183b8e3",
+      "dm/gfx/nvn/nvn_obj.h": "7e338cffb76da425384d0431fd35ee371764ae65fd58a008a4440ae61d24dbf8",
+      "dm/android/tests/t_translation_queue.c": "969fe0f79b34f0adf74d25343001c7d84e05ab7d083879cab2e7f3bd348e2059",
+      "dm/android/tests/t_translation_present.c": "85c2a97d3d41af335a4cd8e582086b994b679f96afebf2973e7cdced9c42c536",
+      "dm/android/tests/run_translation_checks.py": "8442cced8bbf8ad533a9c66ff583251b40820af03e0476d90b9b1d946767a985"
+    }
+  },
+  "regressions": {
+    "passed": true,
+    "test_runs": 10,
+    "tests": [
+      {
+        "test": "pace",
+        "arguments": [],
+        "passed": true,
+        "last_line": "== 23 项，失败 0 =="
+      },
+      {
+        "test": "present",
+        "arguments": [],
+        "passed": true,
+        "last_line": "ANDROID_PRESENT_POLICY checks=37240 legacy_equal=1 fixed60=1 paced_frames=600 stall_recovery=1 passed=1"
+      },
+      {
+        "test": "dirty-race",
+        "arguments": [],
+        "passed": true,
+        "last_line": "t_dirty_race：全通"
+      },
+      {
+        "test": "dirty-slots",
+        "arguments": [],
+        "passed": true,
+        "last_line": "未跟踪范围不漏字节                          期望 7    → 真结果 7    ✓"
+      },
+      {
+        "test": "dirty-summary",
+        "arguments": [
+          "tracker",
+          "0"
+        ],
+        "passed": true,
+        "last_line": "{\"passed\":true,\"summary_enabled\":false,\"comparisons\":166574,\"real_fault_and_prepare\":true,\"concurrent_writers\":4,\"concurrent_rounds\":1000,\"real_concurrent_fault_rounds\":64,\"query_calls\":37015,\"page_reads\":1100989,\"block_reads\":0,\"skipped_pages\":0,\"gpu_executed\":false}"
+      },
+      {
+        "test": "dirty-summary",
+        "arguments": [
+          "tracker",
+          "1"
+        ],
+        "passed": true,
+        "last_line": "{\"passed\":true,\"summary_enabled\":true,\"comparisons\":166574,\"real_fault_and_prepare\":true,\"concurrent_writers\":4,\"concurrent_rounds\":1000,\"real_concurrent_fault_rounds\":64,\"query_calls\":37015,\"page_reads\":218237,\"block_reads\":49254,\"skipped_pages\":882752,\"gpu_executed\":false}"
+      },
+      {
+        "test": "dirty-summary",
+        "arguments": [
+          "properties",
+          "1"
+        ],
+        "passed": true,
+        "last_line": "{\"passed\":true,\"comparisons\":129563,\"concurrent_writers\":4,\"concurrent_rounds\":1000,\"gpu_executed\":false}"
+      },
+      {
+        "test": "touch",
+        "arguments": [],
+        "passed": true,
+        "last_line": "PASS 47/47 cases; 1599/1599 checks"
+      },
+      {
+        "test": "thread-lifetime",
+        "arguments": [],
+        "passed": true,
+        "last_line": "ANDROID_THREAD_LIFETIME threads=200 explicit_detach=100 pthread_exit=100 allocations=800 releases=800 passed=1"
+      },
+      {
+        "test": "save-recovery",
+        "arguments": [
+          "/mnt/d/AndroidSwitch/build/android-measured-optimizations/translation-regressions/save-recovery.json"
+        ],
+        "passed": true,
+        "last_line": "SAVE_RECOVERY checks=66 failures=0 host_linux=1"
+      }
+    ],
+    "receipt_sha256": "9941086f7b511b171bcb3c02ab1e2ea4bca6bf41ba5a9156ffaea87eb6547d92"
+  },
+  "thread_sanitizer": {
+    "status": "blocked_by_host_runtime",
+    "passed": false,
+    "error": "FATAL: ThreadSanitizer: unexpected memory mapping",
+    "log": "D:\\AndroidSwitch\\build\\android-measured-optimizations\\translation-tsan\\queue-sanitized-.log"
+  },
+  "limits": [
+    "CPU tests use a controllable backend, not a Vulkan driver.",
+    "No device performance, thermal, visual, or GPU resource-lifetime validation.",
+    "Command-header indexing and conservative resource barriers require device performance measurement.",
+    "Vulkan snapshot reclamation remains disabled."
+  ]
+}

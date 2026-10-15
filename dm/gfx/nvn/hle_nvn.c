@@ -50,6 +50,14 @@
 #include <time.h>
 #endif
 
+#ifdef __ANDROID__
+static void x_drain(void);
+/* Direct backend mutations must not overtake previously queued translation. */
+#define ANDROID_DRAIN() x_drain()
+#else
+#define ANDROID_DRAIN() ((void)0)
+#endif
+
 // ---------- 槽表、跳板、未实现桩 ----------
 // ---------- Slot table, thunks, unimplemented stubs ----------
 typedef struct { _Atomic uint64_t cnt; void *fn; } nvn_slot_t;
@@ -145,6 +153,10 @@ HLE_FORCE("nvnBootstrapLoader", "NVN 图形接口整块换成宿主空设备（�
 #define B(x) ((x) & 0xff)
 
 #include "nvn_obj.h"
+#ifdef __ANDROID__
+static void android_queue_fence(sync_t *s);
+static NVNsyncWaitResult android_sync_wait(const sync_t *s, uint64_t timeout);
+#endif
 
 // ---------- 设备 ----------
 // ---------- Device ----------
@@ -204,12 +216,12 @@ NVN(nvnDeviceInstallDebugCallback, void, NVNdevice *d, const PFNNVNDEBUGCALLBACK
 NVN(nvnDeviceSetWindowOriginMode, void, NVNdevice *d, NVNwindowOriginMode m) {
     ((dev_t_ *)d)->origin = m;
 #ifdef __ANDROID__
-    mtl_set_window_origin_mode(m);
+    ANDROID_DRAIN(); mtl_set_window_origin_mode(m);
 #endif
     LOG("[nvn] 窗口原点 %s", m ? "左上（同 D3D / Metal）" : "左下（GL）");
 }
 NVN(nvnDeviceSetDepthMode, void, NVNdevice *d, NVNdepthMode m) { ((dev_t_ *)d)->depth_mode = m; LOG("[nvn] 深度模式 %s", m ? "近=0（同 D3D / Metal）" : "近=-w（GL）"); }
-NVN(nvnDeviceFinalizeCommandHandle, void, NVNdevice *d, NVNcommandHandle h) { (void)d; (void)h; }
+NVN(nvnDeviceFinalizeCommandHandle, void, NVNdevice *d, NVNcommandHandle h) { (void)d; (void)h; ANDROID_DRAIN(); }
 
 // ---------- 内存池 ----------
 // ---------- Memory pools ----------
@@ -225,22 +237,35 @@ NVN(nvnMemoryPoolInitialize, NVNboolean, NVNmemoryPool *p, const NVNmemoryPoolBu
     OLOG("MemoryPool %p mem=%p size=%#llx flags=%#x", (void *)p, (void *)o->mem, o->size, o->flags);
     return 1;
 }
-NVN(nvnMemoryPoolFinalize, void, NVNmemoryPool *p) { if (((pool_t *)p)->mem) { nvn_dirty_remove_range(((pool_t *)p)->mem); mtl_pool_del(((pool_t *)p)->mem); } ((pool_t *)p)->magic = 0; }
+NVN(nvnMemoryPoolFinalize, void, NVNmemoryPool *p) {
+    ANDROID_DRAIN();
+    if (((pool_t *)p)->mem) {
+#ifdef __ANDROID__
+        /* Vulkan retirement can still publish guest writes into this pool. */
+        mtl_pool_del(((pool_t *)p)->mem); nvn_dirty_remove_range(((pool_t *)p)->mem);
+#else
+        nvn_dirty_remove_range(((pool_t *)p)->mem); mtl_pool_del(((pool_t *)p)->mem);
+#endif
+    }
+    ((pool_t *)p)->magic = 0;
+}
 NVN(nvnMemoryPoolFlushMappedRange, void, const NVNmemoryPool *p, ptrdiff_t off, size_t n) { (void)p; (void)off; (void)n; }
 NVN(nvnMemoryPoolGetBufferAddress, NVNbufferAddress, const NVNmemoryPool *p) { return (NVNbufferAddress)((const pool_t *)p)->mem; }
 
 // ---------- 描述符池 ----------
 // ---------- Descriptor pools ----------
 NVN(nvnTexturePoolInitialize, NVNboolean, NVNtexturePool *tp, const NVNmemoryPool *p, ptrdiff_t off, int n) {
+    ANDROID_DRAIN();
     *(dpool_t *)tp = (dpool_t){(const pool_t *)p, off, n}; OLOG("TexturePool n=%d", n); mtl_set_tex_pool_n(n); return 1;
 }
-NVN(nvnTexturePoolFinalize, void, NVNtexturePool *tp) { (void)tp; }
-NVN(nvnTexturePoolRegisterTexture, void, const NVNtexturePool *tp, int id, const NVNtexture *t, const NVNtextureView *v) { (void)tp; mtl_reg_tex(id, (const tex_t *)t, (const view_t *)v); }
+NVN(nvnTexturePoolFinalize, void, NVNtexturePool *tp) { (void)tp; ANDROID_DRAIN(); }
+NVN(nvnTexturePoolRegisterTexture, void, const NVNtexturePool *tp, int id, const NVNtexture *t, const NVNtextureView *v) { (void)tp; ANDROID_DRAIN(); mtl_reg_tex(id, (const tex_t *)t, (const view_t *)v); }
 NVN(nvnSamplerPoolInitialize, NVNboolean, NVNsamplerPool *sp, const NVNmemoryPool *p, ptrdiff_t off, int n) {
+    ANDROID_DRAIN();
     *(dpool_t *)sp = (dpool_t){(const pool_t *)p, off, n}; OLOG("SamplerPool n=%d", n); return 1;
 }
-NVN(nvnSamplerPoolFinalize, void, NVNsamplerPool *sp) { (void)sp; }
-NVN(nvnSamplerPoolRegisterSampler, void, const NVNsamplerPool *sp, int id, const NVNsampler *s) { (void)sp; mtl_reg_samp(id, &((const samp_t *)s)->p); }
+NVN(nvnSamplerPoolFinalize, void, NVNsamplerPool *sp) { (void)sp; ANDROID_DRAIN(); }
+NVN(nvnSamplerPoolRegisterSampler, void, const NVNsamplerPool *sp, int id, const NVNsampler *s) { (void)sp; ANDROID_DRAIN(); mtl_reg_samp(id, &((const samp_t *)s)->p); }
 
 // ---------- 贴图 ----------
 // ---------- Textures ----------
@@ -344,7 +369,9 @@ static const prog_t *snap_prog(const NVNprogram *p) {
     return s;
 }
 static void x_drain(void);
+#ifndef __ANDROID__
 static uint64_t x_fence(void);
+#endif
 // 对象 Finalize / 换序号前调：本序号的副本退役（按值拷来的同序号对象之后再录会重新取副本）
 // Called before an object is Finalized / changes serial: retire this serial's snapshot (an object with the same serial copied by value takes a new snapshot when recorded later)
 static void snap_drop(const void **pp, uint64_t ser, uint64_t snap_ser_off) {
@@ -366,7 +393,7 @@ NVN(nvnTextureInitialize, NVNboolean, NVNtexture *t, const NVNtextureBuilder *b)
          o->d.levels, o->d.format, o->d.target, o->d.flags, o->L.size);
     return 1;
 }
-NVN(nvnTextureFinalize, void, NVNtexture *t) { snap_drop(&TX(t)->snap, TX(t)->serial, offsetof(tex_t, serial)); mtl_tex_release(TX(t)); TX(t)->magic = 0; }
+NVN(nvnTextureFinalize, void, NVNtexture *t) { ANDROID_DRAIN(); snap_drop(&TX(t)->snap, TX(t)->serial, offsetof(tex_t, serial)); mtl_tex_release(TX(t)); TX(t)->magic = 0; }
 NVN(nvnTextureGetFlags, NVNtextureFlags, const NVNtexture *t) { return (NVNtextureFlags)CTX(t)->d.flags; }
 NVN(nvnTextureGetWidth, int, const NVNtexture *t) { return (int)CTX(t)->d.width; }
 NVN(nvnTextureGetHeight, int, const NVNtexture *t) { return (int)CTX(t)->d.height; }
@@ -449,29 +476,40 @@ NVN(nvnSamplerFinalize, void, NVNsampler *s) { ((samp_t *)s)->magic = 0; }
 NVN(nvnProgramInitialize, NVNboolean, NVNprogram *p, NVNdevice *d) {
     (void)d; memset(p, 0, sizeof(prog_t)); ((prog_t *)p)->magic = MAGIC('P', 'R', 'O', 'G'); return 1;
 }
-NVN(nvnProgramFinalize, void, NVNprogram *p) { prog_t *o = (prog_t *)p; snap_drop(&o->snap, o->serial, offsetof(prog_t, serial)); mtl_prog_release(o); o->magic = 0; }
+NVN(nvnProgramFinalize, void, NVNprogram *p) { ANDROID_DRAIN(); prog_t *o = (prog_t *)p; snap_drop(&o->snap, o->serial, offsetof(prog_t, serial)); mtl_prog_release(o); o->magic = 0; }
 NVN(nvnProgramSetShaders, NVNboolean, NVNprogram *p, int n, const NVNshaderData *sd) {
     prog_t *o = (prog_t *)p;
     if (n < 0 || n > 6) { LOG("【红】ProgramSetShaders 阶段数 %d", n); return 0; }
-    snap_drop(&o->snap, o->serial, offsetof(prog_t, serial)); mtl_prog_release(o); o->nstage = n; memcpy(o->sd, sd, n * sizeof *sd); o->serial = nvn_new_serial();
+    ANDROID_DRAIN(); snap_drop(&o->snap, o->serial, offsetof(prog_t, serial)); mtl_prog_release(o); o->nstage = n; memcpy(o->sd, sd, n * sizeof *sd); o->serial = nvn_new_serial();
     OLOG("ProgramSetShaders %p n=%d data0=%#llx", (void *)p, n, n ? (unsigned long long)sd[0].data : 0ull);
     return 1;
 }
 
 // ---------- 同步 / 事件 ----------
 // ---------- Sync / events ----------
-NVN(nvnSyncInitialize, NVNboolean, NVNsync *s, NVNdevice *d) { (void)d; *(sync_t *)s = (sync_t){MAGIC('S', 'Y', 'N', 'C'), 0, 0}; return 1; }
-NVN(nvnSyncFinalize, void, NVNsync *s) { ((sync_t *)s)->magic = 0; }
+NVN(nvnSyncInitialize, NVNboolean, NVNsync *s, NVNdevice *d) { (void)d; *(sync_t *)s = (sync_t){.magic=MAGIC('S', 'Y', 'N', 'C')}; return 1; }
+NVN(nvnSyncFinalize, void, NVNsync *s) { ANDROID_DRAIN(); ((sync_t *)s)->magic = 0; }
 // 围栏 = 「此前提交到队列的命令全部完成」：记下最近一次提交的栅栏值
 // Fence = "all commands previously submitted to the queue have completed": record the fence value of the most recent submit
-NVN(nvnQueueFenceSync, void, NVNqueue *q, NVNsync *s, NVNsyncCondition c, int f) { (void)q; (void)c; (void)f; ((sync_t *)s)->fenced = 1; ((sync_t *)s)->fence = x_fence(); }
+NVN(nvnQueueFenceSync, void, NVNqueue *q, NVNsync *s, NVNsyncCondition c, int f) {
+    (void)q; (void)c; (void)f;
+#ifdef __ANDROID__
+    android_queue_fence((sync_t *)s);
+#else
+    ((sync_t *)s)->fenced = 1; ((sync_t *)s)->fence = x_fence();
+#endif
+}
 // 没围栏过的同步对象按真机行为等到超时；已围栏的只在 GPU 真正完成到该栅栏值后放行
 // A sync object that was never fenced waits until timeout, as on a real device; a fenced one is released only after the GPU has actually completed up to that fence value
 NVN(nvnSyncWait, NVNsyncWaitResult, const NVNsync *s, uint64_t timeout) {
+#ifdef __ANDROID__
+    return android_sync_wait((const sync_t *)s, timeout);
+#else
     const sync_t *o = (const sync_t *)s;
     if (!o->fenced) return NVN_SYNC_WAIT_RESULT_TIMEOUT_EXPIRED;
     if (mtl_wait(o->fence, 0)) return NVN_SYNC_WAIT_RESULT_ALREADY_SIGNALED;
     return mtl_wait(o->fence, timeout) ? NVN_SYNC_WAIT_RESULT_CONDITION_SATISFIED : NVN_SYNC_WAIT_RESULT_TIMEOUT_EXPIRED;
+#endif
 }
 NVN(nvnEventBuilderSetDefaults, void, NVNeventBuilder *b) { memset(b, 0, sizeof(ev_builder_t)); }
 NVN(nvnEventBuilderSetStorage, void, NVNeventBuilder *b, const NVNmemoryPool *p, int64_t off) { *(ev_builder_t *)b = (ev_builder_t){(const pool_t *)p, off}; }
@@ -510,7 +548,7 @@ NVN(nvnQueueInitialize, NVNboolean, NVNqueue *q, const NVNqueueBuilder *b) {
     *(queue_t *)q = (queue_t){MAGIC('Q', 'U', 'E', 'U'), ((const queue_builder_t *)b)->dev, 0};
     OLOG("QueueInitialize %p", (void *)q); return 1;
 }
-NVN(nvnQueueFinalize, void, NVNqueue *q) { ((queue_t *)q)->magic = 0; }
+NVN(nvnQueueFinalize, void, NVNqueue *q) { ANDROID_DRAIN(); ((queue_t *)q)->magic = 0; }
 NVN(nvnQueueGetError, NVNqueueGetErrorResult, NVNqueue *q, NVNqueueErrorInfo *info) {
     (void)q; if (info) memset(info, 0, sizeof *info); return NVN_QUEUE_GET_ERROR_RESULT_GPU_NO_ERROR;
 }

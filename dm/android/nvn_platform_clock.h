@@ -9,7 +9,7 @@ void dm_android_nvn_presented(uint64_t frame);
  * hint service calls happen outside the Vulkan lock at acquire/present edges. */
 enum dm_android_nvn_wait_kind {
     DM_NVN_WAIT_FENCE, DM_NVN_WAIT_QUEUE_IDLE, DM_NVN_WAIT_ACQUIRE,
-    DM_NVN_WAIT_PRESENT, DM_NVN_WAIT_EVENT, DM_NVN_WAIT_KIND_COUNT
+    DM_NVN_WAIT_PRESENT, DM_NVN_WAIT_EVENT, DM_NVN_WAIT_TRANSLATION_QUEUE, DM_NVN_WAIT_KIND_COUNT
 };
 void dm_android_nvn_work_begin(void);
 void dm_android_nvn_work_check_thread(void);

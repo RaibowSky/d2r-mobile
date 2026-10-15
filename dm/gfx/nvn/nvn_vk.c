@@ -8,6 +8,7 @@
 #include <vulkan/vulkan.h>
 #include <android/native_window.h>
 #include "nvn_obj.h"
+#include "nvn_translation_sync.h"
 #include "../../android/nvn_platform_clock.h"
 #include "nvn_mtl.h"
 #include "nvn_dirty.h"
@@ -212,7 +213,7 @@ static struct {
     ShaderEntry *shader_entries;size_t shader_entry_capacity;
     VkSurfaceKHR surface; VkSwapchainKHR swapchain; VkImage *swap_images; VkImageLayout *swap_layouts;
     uint32_t nswap; VkFormat swap_format; VkExtent2D swap_extent; int display_hz;
-    _Atomic uint64_t fence,completed,present_count; uint64_t draws,pass_count,uploads,pool_adds,frame;
+    _Atomic uint64_t fence,completed,present_count,frame; uint64_t draws,pass_count,uploads,pool_adds;
     int trace_frame,trace_ui;_Atomic int window_origin;
     uint64_t profile_pipeline_ns,profile_wait_ns,profile_decode_ns,profile_submits,profile_start_ns,profile_draws,profile_frames;
     uint64_t profile_submit_candidates,profile_candidate_wait_ns,profile_writeback_bytes,profile_events,profile_reports;
@@ -2793,7 +2794,7 @@ static void execute(const uint8_t *p,unsigned depth) {
                 all_barrier_soft();
             }else{
                 if(v->condition<0 || v->condition>1 || v->flags&~1)die("fence condition/flags",v->flags);
-                all_barrier_soft();v->sync->fence=G.fence+1;v->sync->fenced=1;
+                all_barrier_soft();dm_nvn_sync_publish(v->sync,G.fence+1);
                 /* CPU completion remains false until vkWaitForFences finishes. */
             }break;}
         case OP_COPY_B2T:payload_check(&h,sizeof(p_copy_b2t));copy_b2t((const p_copy_b2t *)a);break;

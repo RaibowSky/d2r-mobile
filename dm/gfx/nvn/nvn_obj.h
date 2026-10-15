@@ -46,7 +46,15 @@ typedef struct { uint32_t magic; samp_par p; } samp_t;                          
 
 typedef struct { uint32_t magic, nstage; NVNshaderData sd[6]; uint64_t serial; const void *snap; } prog_t;     FITS(prog_t, NVNprogram);   // serial：回放层解析结果的表键；snap：本序号的不可变副本（同 tex_t） | serial: table key for the replay layer's resolved results; snap: this serial's immutable snapshot (same as tex_t)
 
-typedef struct { uint32_t magic, fenced; uint64_t fence; } sync_t;                            FITS(sync_t, NVNsync);
+#ifdef __ANDROID__
+#include <stdatomic.h>
+/* pending/translated count queued/reached fence operations; fence is a real GPU value.
+ * A command fence can be reached before its whole command handle completes. */
+typedef struct { uint32_t magic; _Atomic uint32_t fenced; _Atomic uint64_t fence, pending, translated; } sync_t;
+#else
+typedef struct { uint32_t magic, fenced; uint64_t fence; } sync_t;
+#endif
+FITS(sync_t, NVNsync);
 typedef struct { const pool_t *pool; int64_t off; } ev_builder_t;                             FITS(ev_builder_t, NVNeventBuilder);
 typedef struct { uint32_t magic; volatile uint32_t *val; } ev_t;                              FITS(ev_t, NVNevent);
 

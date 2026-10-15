@@ -177,11 +177,11 @@ void dm_android_nvn_work_end(uint64_t frame) {
     }else hint.skipped++;
     f->active=f->discard=0;
     if(hint.frames>=60){
-        fprintf(stderr,"[nvn-android] ADPF_WORK_PROFILE frame=%llu frames=%llu valid_frames=%llu skipped_frames=%llu enabled=%d available=%d tid=%d target_ns=%lld cpu_work_wall_ms=%.3f thread_cpu_ms=%.3f excluded_fence_ms=%.3f excluded_queue_idle_ms=%.3f excluded_acquire_ms=%.3f excluded_present_ms=%.3f excluded_event_ms=%.3f report_success=%llu report_failed=%llu\n",
+        fprintf(stderr,"[nvn-android] ADPF_WORK_PROFILE frame=%llu frames=%llu valid_frames=%llu skipped_frames=%llu enabled=%d available=%d tid=%d target_ns=%lld cpu_work_wall_ms=%.3f thread_cpu_ms=%.3f excluded_fence_ms=%.3f excluded_queue_idle_ms=%.3f excluded_acquire_ms=%.3f excluded_present_ms=%.3f excluded_event_ms=%.3f excluded_translation_idle_ms=%.3f report_success=%llu report_failed=%llu\n",
             (unsigned long long)frame,(unsigned long long)hint.frames,(unsigned long long)hint.valid,(unsigned long long)hint.skipped,
             hint.enabled,hint.session!=NULL,hint.owner?(int)hint.owner->tid:-1,(long long)hint_target_ns,hint.wall_ns/1e6,hint.cpu_ns/1e6,
             hint.waits[DM_NVN_WAIT_FENCE]/1e6,hint.waits[DM_NVN_WAIT_QUEUE_IDLE]/1e6,hint.waits[DM_NVN_WAIT_ACQUIRE]/1e6,
-            hint.waits[DM_NVN_WAIT_PRESENT]/1e6,hint.waits[DM_NVN_WAIT_EVENT]/1e6,(unsigned long long)hint.success,(unsigned long long)hint.errors);
+            hint.waits[DM_NVN_WAIT_PRESENT]/1e6,hint.waits[DM_NVN_WAIT_EVENT]/1e6,hint.waits[DM_NVN_WAIT_TRANSLATION_QUEUE]/1e6,(unsigned long long)hint.success,(unsigned long long)hint.errors);
         hint.frames=hint.valid=hint.skipped=hint.wall_ns=hint.cpu_ns=hint.success=hint.errors=0;
         memset(hint.waits,0,sizeof hint.waits);
     }
