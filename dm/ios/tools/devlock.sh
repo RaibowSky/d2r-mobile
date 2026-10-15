@@ -16,6 +16,12 @@ DEVLOCK_TICKET=
 # Only the holder's own process tree is touched (except the watchdog itself), nobody else's. Reentrant cases (nested acquire / child processes inheriting DM_DEVLOCK_HELD) start no extra watchdog and do not change the limit
 DEVLOCK_WD_PID=
 DEVLOCK_WD_LOG=${DM_DEVLOCK_WD_LOG:-${DM_ROOT:-$HOME/dm-work}/run/ios/devlock_watchdog.log}
+# 持锁记录（追加式，一行一事件，制表符分列：时刻 取/放 pid 锁目录 持有者 秒数）：取 = 排队等了几秒，放 = 持有了几秒。
+# 用来统计测试机被谁占了多久、排队等了多久；看门狗强收的那次没有「放」行，看 devlock_watchdog.log
+# Lock hold log (append only, one event per line, tab separated: time take/release pid lock-directory holder seconds): take = seconds spent queued, release = seconds held.
+# Used to track who occupied the test device and for how long, and how long the queue waited; a forced reclaim by the watchdog has no "release" line, see devlock_watchdog.log
+DEVLOCK_HIST=${DM_DEVLOCK_HIST:-${DM_ROOT:-$HOME/dm-work}/run/ios/devlock_hist.tsv}
+devlock_hist() { mkdir -p "$(dirname "$DEVLOCK_HIST")" 2>/dev/null; printf '%s\t%s\t%s\t%s\t%s\t%s\n' "$(date '+%F %T')" "$1" "$$" "$DEVLOCK_DIR" "$2" "$3" >> "$DEVLOCK_HIST" 2>/dev/null || true; }
 devlock_default_max() {
   [ "$DEVLOCK_DIR" = "${DM_ROOT:-$HOME/dm-work}/run/ios/device.lock" ] || { echo 0; return; }
   [ "${DM_DEVLOCK_CLASS:-}" = measure ] && echo 1200 || echo 600
@@ -36,8 +42,8 @@ devlock_watchdog() {   # 在后台跑：$1 持锁 pid，$2 其启动时刻，$3 
     kill -0 "$holder" 2>/dev/null || exit 0
     started=$(cat "$DEVLOCK_DIR/started" 2>/dev/null || echo 0); now=$(date +%s); held=$((now - started))
     [ "$held" -ge "$max" ] || continue
-    local msg="【红】设备锁看门狗：持有者「$owner」（pid $holder）已持有 ${held} 秒，超过上限 ${max} 秒 → 终止持锁进程树、释放锁"
-    echo "$msg" >&2; mkdir -p "$(dirname "$DEVLOCK_WD_LOG")"; echo "$(date '+%F %T') $msg（锁 $DEVLOCK_DIR）" >> "$DEVLOCK_WD_LOG"
+    local msg="【红】设备锁看门狗：持有者「${owner}」（pid ${holder}）已持有 ${held} 秒，超过上限 ${max} 秒 → 终止持锁进程树、释放锁"
+    echo "$msg" >&2; mkdir -p "$(dirname "$DEVLOCK_WD_LOG")"; echo "$(date '+%F %T') ${msg}（锁 ${DEVLOCK_DIR}）" >> "$DEVLOCK_WD_LOG"
     victims=$(devlock_descendants "$holder" | grep -v -x -e "$me" $(devlock_descendants "$me" | sed 's/^/-e /'))
     for v in $victims "$holder"; do kill -TERM "$v" 2>/dev/null; done
     sleep 5
@@ -114,12 +120,13 @@ devlock_acquire() {
   local rc=0; _devlock_acquire "$@" || rc=$?
   if [ "$rc" = 0 ] && [ "$(cat "$DEVLOCK_DIR/pid" 2>/dev/null)" != "${DM_DEVLOCK_HELD:-}" ]; then rc=97; fi
   [ "$rc" = 0 ] && return 0
-  echo "【红】设备锁：${1:-unknown} 没取到锁（返回 $rc；锁 $DEVLOCK_DIR 现在的持有者「$(cat "$DEVLOCK_DIR/owner" 2>/dev/null || echo 无)」pid $(cat "$DEVLOCK_DIR/pid" 2>/dev/null || echo 无)）" >&2
+  echo "【红】设备锁：${1:-unknown} 没取到锁（返回 ${rc}；锁 $DEVLOCK_DIR 现在的持有者「$(cat "$DEVLOCK_DIR/owner" 2>/dev/null || echo 无)」pid $(cat "$DEVLOCK_DIR/pid" 2>/dev/null || echo 无)）" >&2
   return "$rc"
 }
 _devlock_acquire() {
   local owner=${1:-unknown} max=${2:-${DM_DEVLOCK_MAX_S:-}} held_lstart pid lock_owner started now held lock_lstart self_lstart lock_pid_lstart current_pid last_notice=0 lock_max over_notice=0
   [ -n "$max" ] || max=$(devlock_default_max)
+  local q0=$SECONDS
   mkdir -p "$(dirname "$DEVLOCK_DIR")" 2>/dev/null && [ -w "$(dirname "$DEVLOCK_DIR")" ] || return 98   # 锁的父目录建不出 / 写不了：下面的抢锁循环会空转，直接报失败 | The lock's parent directory cannot be created / written: the lock-grabbing loop below would spin, so report failure directly
   current_pid=${BASHPID:-$$}
   self_lstart=$(devlock_lstart $$)
@@ -144,11 +151,13 @@ _devlock_acquire() {
   if { [ "$DEVLOCK_DIR" = "${DM_ROOT:-$HOME/dm-work}/run/ios/device.lock" ] && [ "${DM_DEVBATTERY:-1}" != 0 ]; } || [ "${DM_DEVBATTERY:-}" = 1 ]; then
     source "$(dirname "${BASH_SOURCE[0]}")/devbattery.sh"
     local bw0=$SECONDS bwmax=${DM_DEVBATTERY_WAIT_S:-3600}
+    local brc
     until devbattery_gate; do
+      brc=$?; [ $brc != 3 ] || { echo "【红】电量闸：本机缺命令（见上一行），等也没用，$owner 不取锁、退出" >&2; exit 4; }
       [ $((SECONDS - bw0)) -ge "$bwmax" ] && { echo "【红】电量闸等了 $((SECONDS - bw0)) 秒仍不放行（${DEVBATTERY_LINE:-}），$owner 不取锁、退出" >&2; exit 4; }
       sleep "${DM_DEVBATTERY_POLL_S:-60}"
     done
-    echo "电量闸放行：${DEVBATTERY_LINE:-}（$owner）" >&2
+    echo "电量闸放行：${DEVBATTERY_LINE:-}（${owner}）" >&2
   fi
   devlock_ticket_take "$owner"
   local ahead first q_notice=0
@@ -183,8 +192,8 @@ _devlock_acquire() {
       # 超过上限 30 秒还没放（持锁者的看门狗也没管用）：记红，但不碰别人的进程
       # Still not released 30 seconds past the limit (the holder's watchdog did not work either): log a failure line, but do not touch other people's processes
       if [ "${lock_max:-0}" -gt 0 ] && [ "$held" -gt $((lock_max + 30)) ] && [ $((now - over_notice)) -ge 60 ]; then
-        echo "【红】设备锁：持有者 ${lock_owner}（pid $pid）已持有 ${held} 秒，超过上限 ${lock_max} 秒仍未释放（看门狗没起作用），不代为终止，请找持有者" >&2
-        mkdir -p "$(dirname "$DEVLOCK_WD_LOG")"; echo "$(date '+%F %T') 等锁方：持有者「${lock_owner}」pid $pid 已持有 ${held} 秒、上限 ${lock_max} 秒仍未释放（锁 $DEVLOCK_DIR）" >> "$DEVLOCK_WD_LOG"
+        echo "【红】设备锁：持有者 ${lock_owner}（pid ${pid}）已持有 ${held} 秒，超过上限 ${lock_max} 秒仍未释放（看门狗没起作用），不代为终止，请找持有者" >&2
+        mkdir -p "$(dirname "$DEVLOCK_WD_LOG")"; echo "$(date '+%F %T') 等锁方：持有者「${lock_owner}」pid $pid 已持有 ${held} 秒、上限 ${lock_max} 秒仍未释放（锁 ${DEVLOCK_DIR}）" >> "$DEVLOCK_WD_LOG"
         over_notice=$now
       fi
       sleep 1
@@ -202,6 +211,7 @@ _devlock_acquire() {
   export DM_DEVLOCK_HELD=$$
   devlock_ticket_drop
   DEVLOCK_DEPTH=1
+  devlock_hist 取 "$owner" $((SECONDS - q0))
   if [ "${max:-0}" -gt 0 ]; then
     devlock_watchdog "$$" "$self_lstart" "$max" "$owner" </dev/null >/dev/null &
     DEVLOCK_WD_PID=$!; disown "$DEVLOCK_WD_PID" 2>/dev/null || true
@@ -224,6 +234,7 @@ devlock_release() {
   # leaving a lock whose holder is dead (seen in run j; offline reproduction: hold the lock 2 seconds then release, exit code 1, lock directory still there)
   if [ -n "$DEVLOCK_WD_PID" ]; then local wk; wk=$(pgrep -P "$DEVLOCK_WD_PID" 2>/dev/null) || true; kill -KILL "$DEVLOCK_WD_PID" 2>/dev/null || true; [ -z "$wk" ] || kill -KILL $wk 2>/dev/null || true; DEVLOCK_WD_PID=; fi
   [ "$(cat "$DEVLOCK_DIR/pid" 2>/dev/null)" = "$$" ] || return 0
+  devlock_hist 放 "$(cat "$DEVLOCK_DIR/owner" 2>/dev/null)" $(( $(date +%s) - $(cat "$DEVLOCK_DIR/started" 2>/dev/null || date +%s) ))
   rm -rf "$DEVLOCK_DIR"
   DEVLOCK_DEPTH=0
 }

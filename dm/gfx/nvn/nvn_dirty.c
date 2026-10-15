@@ -19,8 +19,24 @@
 #else
 #include <mach/mach_time.h>
 #endif
+#include <sched.h>
 
-enum { PG_NONE = 0, PG_PROT = 1, PG_BUSY = 2 };   // BUSY：正在解除保护（另一线程同时缺页时自旋等它） | BUSY: being unprotected (another thread faulting at the same time spins waiting for it)
+// 页状态与 mprotect 的次序（改保护的一方先把状态改成 BUSY，mprotect 落地后才改成终态；别的线程见 BUSY 就等）：
+//   设只读：NONE → BUSY → mprotect(只读) → PROT；解保护：PROT → BUSY → mprotect(可写) → NONE。
+// 不变式：状态是 NONE 的页一定可写、是 PROT 的页一定只读。原先设只读是「先记 PROT、攒一段再 mprotect」，这段时间里另一线程的写前解保护
+// 会把状态改回 NONE，随后攒批的 mprotect 落地 ⇒ 页只读而状态 NONE：游戏线程写它时缺页处理只回「重执行」永远空转；
+// 宿主用系统调用往里读文件时 prep_write 看状态 NONE 跳过，系统调用不走缺页处理，直接 EFAULT、数据读不全。
+// BUSY 最长持续 = 一次 mprotect 的时间（设只读时再加上给这一段逐页改状态的几次原子写）。等待有上限 BUSY_WAIT_MS，超限报红：
+// 缺页处理里超限按「不是我们的页」返回，交给崩溃处理如实报崩，不静默空转。等待只读原子量、不拿任何锁。
+// Order of page state and mprotect (the side changing protection first sets the state to BUSY and sets the final state only after mprotect has landed; other threads wait when they see BUSY):
+//   set read-only: NONE -> BUSY -> mprotect(read-only) -> PROT; unprotect: PROT -> BUSY -> mprotect(writable) -> NONE.
+// Invariant: a page whose state is NONE is always writable, and one whose state is PROT is always read-only. Setting read-only used to be "record PROT first, batch up a run, then mprotect"; during that time another thread's unprotect-before-write
+// could set the state back to NONE, and then the batched mprotect landed => the page read-only with state NONE: when the game thread wrote to it the page-fault handler only returned "re-execute" and spun forever;
+// when the host read a file into it with a system call, prep_write saw state NONE and skipped, the system call did not go through the page-fault handler and failed with EFAULT, leaving the data incomplete.
+// BUSY lasts at most one mprotect (plus, when setting read-only, the few atomic writes that change the state of the pages in the run). The wait has an upper limit BUSY_WAIT_MS and reports red beyond it:
+// in the page-fault handler, exceeding it returns "not our page" and lets the crash handler report the crash truthfully instead of spinning silently. The wait only reads atomics and takes no lock.
+enum { PG_NONE = 0, PG_PROT = 1, PG_BUSY = 2 };
+enum { BUSY_WAIT_MS = 2000 };
 // 跟踪区间 = 各内存池（MemoryPoolInitialize 登记）。池销毁后复用 live=0 的槽，信号处理里无锁扫描。
 // Tracked ranges = the memory pools (registered by MemoryPoolInitialize). After a pool is destroyed its live=0 slot is reused; the signal handler scans without locks.
 #define MAX_RANGE 4096   // 原为 256：内存池多于它时超出的池不跟踪，里面的贴图每次取用都当成脏的重传（暗黑实测峰值见内存读数行的「内存池」；塞尔达约 300 个，踩过）。扫描只到已用的槽数，容量大不增加开销 | was 256: with more memory pools than that the excess pools are untracked and their textures are treated as dirty and re-uploaded on every use (for Diablo's measured peak see "memory pools" in the memory readout line; Zelda has about 300 and hit this). The scan only covers slots in use, so a larger capacity costs nothing
@@ -62,6 +78,34 @@ static void mp(uintptr_t a, size_t len, int prot) {
 #endif
 }
 
+#ifndef __ANDROID__
+static mach_timebase_info_data_t g_tb;   // Initialized before installing fault hooks.
+#endif
+static uint64_t dirty_clock_ns(void) {
+#ifdef __ANDROID__
+    return dm_android_nvn_clock_ns();
+#else
+    return mach_absolute_time() * g_tb.numer / g_tb.denom;
+#endif
+}
+static _Atomic int g_busy_red;
+// 等这一页离开 BUSY。返回 1 = 已离开；0 = 等过了上限（报红一次）。信号处理里可用：只有原子读、mach_absolute_time、sched_yield
+// Wait for this page to leave BUSY. Returns 1 = it has left; 0 = waited past the limit (reported red once). Usable in a signal handler: only atomic reads, mach_absolute_time and sched_yield
+static int busy_wait(range_t *r, uintptr_t p) {
+    uint64_t t0 = 0;
+    for (unsigned n = 1; atomic_load(&r->state[p]) == PG_BUSY; n++) {
+        if (n & 0x3ff) continue;
+        uint64_t now = dirty_clock_ns(); if (!t0) t0 = now;
+        if (now - t0 > (uint64_t)BUSY_WAIT_MS * 1000000ull) {
+            if (!atomic_exchange(&g_busy_red, 1)) {
+                static const char failure[] = "[nvn] dirty-page BUSY timeout\n";
+                ssize_t written = write(STDERR_FILENO, failure, sizeof failure - 1); (void)written;
+            }
+            return 0; }
+        sched_yield();
+    }
+    return 1;
+}
 static range_t *find(uintptr_t a) {
     int n = atomic_load(&g_nr);
     for (int i = 0; i < n; i++) if (atomic_load_explicit(&g_r[i].live, memory_order_acquire) && a >= g_r[i].base && a < g_r[i].end) return &g_r[i];
@@ -85,7 +129,7 @@ static int on_fault(void *addr, int is_write, void *uc) {
     uintptr_t p = (address - r->base) >> g_shift;
     uint8_t st = PG_PROT;
     if (atomic_compare_exchange_strong(&r->state[p], &st, PG_BUSY)) { unprotect_page(r, p); atomic_fetch_add(&g_faults, 1); return 1; }
-    if (st == PG_BUSY) { while (atomic_load(&r->state[p]) == PG_BUSY) {} return 1; }   // 别的线程正在解：等它解完重执行 | Another thread is unprotecting it: wait for it to finish and re-execute
+    if (st == PG_BUSY) return busy_wait(r, p);   // 别的线程正在改这页的保护：等它改完重执行（改成了只读就再缺页一次、走上面那一支） | Another thread is changing this page's protection: wait for it to finish and re-execute (if it became read-only, it faults once more and takes the branch above)
     return atomic_load(&r->gen[p]) != 0;   // 刚被别的线程解掉（本次缺页发生在解之前）：重执行；从未保护过的页不是我们的 | Just unprotected by another thread (this fault happened before the unprotect): re-execute; pages that were never protected are not ours
 }
 static void prep_write(void *addr, size_t len) {
@@ -118,7 +162,10 @@ static void prep_write(void *addr, size_t len) {
                 atomic_fetch_add(&g_preps, count);
                 p = after;
             } else {
-                if (st == PG_BUSY) while (atomic_load(&r->state[p]) == PG_BUSY) {}
+                if (st == PG_BUSY) {
+                    if (!busy_wait(r, p)) die("dirty write preparation timed out");
+                    continue; /* The other owner may have made this page read-only. */
+                }
                 p++;
             }
         }
@@ -127,6 +174,9 @@ static void prep_write(void *addr, size_t len) {
 }
 
 static void dirty_initialize(void) {
+#ifndef __ANDROID__
+    mach_timebase_info(&g_tb);
+#endif
     const char *summary=getenv("DM_DIRTY_SUMMARY"),*stats=getenv("DM_DIRTY_QUERY_STATS");
     g_summary_enabled=summary&&atoi(summary)!=0;g_query_recording=stats&&atoi(stats)!=0;
     g_pg=(uintptr_t)getpagesize();g_shift=__builtin_ctzl(g_pg);dm_fault_hook_register(on_fault);dm_guest_write_prep_register(prep_write);
@@ -188,22 +238,22 @@ void nvn_dirty_remove_range(const void *mem) {
 int nvn_dirty_tracked(const void *addr, size_t len) {
     uintptr_t a=address_of(addr);range_t *r = find(a); return r && len<=r->end-a;
 }
-// 设只读：先置状态再 mprotect（反过来会有「页已只读、状态仍为 0」的窗口，那时的合法写入会被当成崩溃）
-// Set read-only: set the state first, then mprotect (the reverse leaves a window of "page already read-only, state still 0", during which a legitimate write would be treated as a crash)
+// 设只读：先把页标成 BUSY，mprotect 落地后才标 PROT（次序与不变式见文件头的状态说明）
+// Set read-only: mark the page BUSY first, and mark it PROT only after mprotect has landed (for the order and the invariant see the state notes at the top of the file)
 void nvn_dirty_protect(const void *addr, size_t len) {
     if (!len || !nvn_dirty_tracked(addr, len)) return;
     range_t *r = find(address_of(addr));
     uintptr_t a = address_of(addr), p = (a - r->base) >> g_shift, q = (a + len - 1 - r->base) >> g_shift;
     // 连续置成 PROT 的页合成一次 mprotect（逐页调用在首传大贴图时一帧上千次；选角页启动帧 5：4888 次）。
-    // 已是 PROT / BUSY 的页断开连续段：不重复保护，也不碰别的线程正在解的页
-    // Consecutive pages set to PROT are merged into one mprotect (per-page calls reach thousands per frame on the first upload of large textures; character select page startup frame 5: 4888 calls).
-    // Pages already PROT / BUSY break the consecutive run: do not protect again, and do not touch pages another thread is unprotecting
+    // 已是 PROT / BUSY 的页断开连续段：不重复保护，也不碰别的线程正在改的页
+    // Consecutive pages set to PROT are merged into one mprotect (per-page calls ran to over a thousand per frame when large textures were first uploaded; character select, startup frame 5: 4888 calls).
+    // Pages already PROT / BUSY break a run: they are not protected again, and pages another thread is changing are left alone
     uintptr_t run = 0; int open = 0;
     for (uintptr_t i = p; i <= q + 1; i++) {
         uint8_t st = PG_NONE;
-        int took = i <= q && atomic_compare_exchange_strong(&r->state[i], &st, PG_PROT);
+        int took = i <= q && atomic_compare_exchange_strong(&r->state[i], &st, PG_BUSY);
         if (took && !open) { run = i; open = 1; }
-        if (!took && open) { mp(r->base + (run << g_shift), (i - run) << g_shift, PROT_READ); open = 0; }
+        if (!took && open) { mp(r->base + (run << g_shift), (i - run) << g_shift, PROT_READ); for (uintptr_t k = run; k < i; k++) atomic_store(&r->state[k], PG_PROT); open = 0; }
     }
 }
 uint64_t nvn_dirty_now(void) { return atomic_load(&g_now); }

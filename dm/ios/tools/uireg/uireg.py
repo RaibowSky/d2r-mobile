@@ -274,7 +274,7 @@ def stay(s,before):   # 人不离开原地：本段第一条与最后一条 pos 
 # 物品栏一侧 +38.5（背包第 0 列 424.5）、关闭钮 654.5、取金币钮 187.5；宝石 / 材料 / 符文 / 魔盒四页回到原版位置。这几局（与 top / v 局开箱那几步）的点位都按这个量过
 # After the stash widening (10 → 14 columns, the panel shift multiplied by the panel scale), with the stash open: the stash side is x −39 from the original game (personal tab 62.5, shared 106.5, personal page column 0 at 60),
 # the inventory panel side is +38.5 (inventory column 0 at 424.5), close button 654.5, withdraw gold button 187.5; the four pages gems / materials / runes / cube are back at the original game's positions. The tap positions of these runs (and of the stash-opening steps of the top / v runs) were all measured this way
-WIDE=("c","d","t","u","s")
+WIDE=("c","d","t","u","s","sa")
 def run(g):
     global INV_X0; INV_X0=424.5 if g.run in WIDE else 386.0   # 背包占格的读法跟着物品栏右移 | the inventory occupancy reading follows the inventory panel's shift to the right
     script="\n".join(g.L)+f"\n{g.t+1.0:.2f} note 结束\n"; cap=int(g.t)+6; tag=f"{os.environ.get('UIREG_TAG') or 'ur'}_{MODE}_{g.run}"   # 起局脚本见到「note 结束」就收，cap 只是上限 | the run launcher script stops as soon as it sees 「note 结束」(note end); cap is only an upper limit
@@ -586,6 +586,19 @@ def groups():
     g.item("从成叠格拖到背包","取 1 件",r"取多件：.*取 1："); g.dragp((201,81),(488.5,297)); g.shot()
     g.item("从成叠格拖到面板下方松手","不取",r"拖放落点|界面命中",r"取多件"); g.dragp((201,81),(333,372)); g.shot()
     gs.append(g)
+    # sa 局：往个人页 / 共享页里存符文自动进高级仓库（珍宝匣存入，dm_pouch.c）。同 d 局的存档与开头：珍宝匣页符文那一叠 12 个，每次双击取 1 个到背包（落在背包右上角那格），
+    # 再把它拖进个人页 / 共享页的格子，或开着箱子双击它。判据读宿主日志：个人页 = 落下后服务端代发原版「移到仓库」；共享页 = 收包处改道（放回背包原格再发）；双击 = 原版「移动到堆叠栏」
+    # Run sa: runes stored into the personal page / shared page go into the advanced stash automatically (trove deposit, dm_pouch.c). Same save and opening as run d: the stack of 12 runes on the trove page, each double-tap takes 1 into the backpack (it lands in the top-right backpack cell),
+    # then drag it into a cell of the personal page / shared page, or double-tap it with the stash open. The criteria read the host log: personal page = after the drop the server sends the original "move to stash" on its behalf; shared page = rerouted at packet receive (put back into its backpack cell and sent again); double-tap = the original "move to stacking tab"
+    g=G("sa","DM_TEST_WORLD_GO=near2:2:c267@200 DM_C2S_LOG=pwc2s.jsonl",save=os.environ.get("UIREG_STACK_SAVE") or "save.pw_rune_stack"); g.sect("stashauto",0); g.t=3.5; g.tap(P(333,336),1.6); g.at("await pos"); g.t=max(g.t,13.0); g.at("note 进局",1.5)
+    g.item("点箱子","开储藏箱",r"OpenPanel BankExpansionLayout"); g.arrive(5808,4443,3,24.0); g.at("tap_unit 2 267 3",3.0); g.shot()
+    g.item("珍宝匣页双击符文那一叠","取 1 件到背包",r"取多件：.*取 1："); g.tap(P(148,53)); g.dbl(201,81); g.shot()
+    g.item("切到个人页，把背包里那颗符文拖进个人页格子","落下后自动转进珍宝匣，个人页不留",r"珍宝匣：仓库页里新落下的物品[\s\S]*珍宝匣：物品 id \d+ 已从仓库页转进高级仓库",r"2 秒还在仓库页"); g.tap(P(62,53)); g.dragp((600.5,227),(81,237)); g.wait(2.5); g.shot()
+    g.item("珍宝匣页再取 1 件","到背包（那一叠还是 12 个：上一步拖进个人页的那颗回来了）",r"叠数 12 取 1："); g.tap(P(148,53)); g.dbl(201,81); g.shot()
+    g.item("切到共享页，把它拖进共享页格子","收包处改道：放回背包原格、下一拍进珍宝匣；共享页不留",r"珍宝匣：r01[^\n]*拖进共享页 → 改成放回背包格[\s\S]*珍宝匣：物品 id \d+ 已回到背包 → 原版移到仓库",r"留在背包"); g.tap(P(106,53)); g.dragp((600.5,227),(81,237)); g.wait(2.5); g.shot()
+    g.item("珍宝匣页再取 1 件","到背包（那一叠还是 12 个：上一步拖进共享页的那颗也回来了）",r"叠数 12 取 1："); g.tap(P(148,53)); g.dbl(201,81); g.shot()
+    g.item("开着箱子双击背包里的那颗符文","原版「移动到堆叠栏」：背包少 1 格（回到珍宝匣那一叠）",("inv",-1)); g.dbl(600.5,246.5); g.wait(2.0); g.shot()
+    gs.append(g)
     # t 局：背包里带着魔盒时从符文页那一叠取件——双击 / 长按 / 拖三种手法。判据读截图的背包占格（魔盒本身占 4 格，取出的符文要多占格；占格增量 = 叠数减量，就没有东西进了魔盒），叠数认取件时读到的游戏值
     # t run: with the cube in the inventory, take items from that stack on the rune page - three gestures: double-tap / long-press / drag. The criterion reads the inventory cell occupancy from the screenshot (the cube itself takes 4 cells, and runes taken out must take additional cells; cell increase = stack count decrease means nothing went into the cube), and the stack count trusts the game value read at take time
     SV=os.environ.get("UIREG_STACK_SAVE") or "save.pw_rune_stack"
@@ -654,6 +667,13 @@ def groups():
     g.tap(P(120,200),1.5)
     g.item("「综合技能」页长按另一个技能","开绑定框",r"OpenPanel ButtonBindingModal"); g.hold(301,114,1.3); g.shot()
     g.tap(P(120,200),1.5); g.tap(P(615,17),1.2)
+    gs.append(g)
+    # shl 局：暂停菜单「分享诊断日志」。测试开关让分享面板弹出 3 秒后自己收起（真机截不到系统弹层，只读日志）；导出的文件另拷一份到容器 Documents/sharelog_test.txt
+    # shl run: pause menu "Share diagnostic log". A test switch lets the share sheet dismiss itself 3 seconds after it appears (system overlays cannot be captured on a device, only the log is read); the exported file is also copied to Documents/sharelog_test.txt in the container
+    g=G("shl","DM_TEST_SHARELOG_CLOSE=3"); g.sect("sharelog",0); g.enter(); g.tap("@menu",1.4); g.tap(P(551,17))
+    g.item("暂停菜单点「分享诊断日志」","两份日志打成一个文件（本局那份非空）、分享面板弹出",r"诊断日志：已打包 \S+（\d+ 字节：本局 [1-9]\d*、[^\n]*\n(?:[^\n]*\n){0,40}?[^\n]*诊断日志：分享面板已弹出"); g.at("tap_ui MessageLog@PauseLayoutGarden 3",2.5); g.shot()
+    g.item("等 3 秒","分享面板到点自己收起",r"到点收起分享面板"); g.wait(3.0); g.shot()
+    g.item("再点一次「分享诊断日志」","又能打包（上一次收起后没卡在忙状态）",r"诊断日志：已打包"); g.at("tap_ui MessageLog@PauseLayoutGarden 3",5.5); g.shot()
     gs.append(g)
     # i 局：雇佣兵（第一幕卡夏；第二幕格雷兹是同一个雇佣面板）。最小步骤来自一条真问题：雇佣名单里同一行连点几下、雇成之后面板栈的计数没清，摇杆和技能钮回不来
     # i run: hiring a mercenary (Act 1 Kashya; Act 2 Greiz is the same hire panel). The minimal steps come from a real problem: tapping the same row of the hire list several times, the panel stack count was not cleared after the hire succeeded, and the stick and skill buttons did not come back
@@ -1064,7 +1084,15 @@ def groups():
     LISTOK=r"符文之语：长按[^\n]*→ 清单 [1-9]\d* 行"
     def anyl(p): return lambda s,b: ("通：" if re.search(p,b+s) else "不通：")+"整局日志"
     # rw1：背包里符文齐——长按 1 孔软帽不开清单；长按 2 孔软帽开清单；点清单外关；再长按、点「一键合成」成型，两枚符文离开背包
-    # rw1: all runes are in the inventory - long-pressing the 1-socket cap does not open the list; long-pressing the 2-socket cap opens the list; tapping outside the list closes it; long-press again and tap 「一键合成」(Craft) to form it, and the two runes leave the inventory
+    # rwlv 局：清单里的「需要等级」取底材的需求等级，不是物品等级（线上缺陷：塔盔需求 59、物品等级 79，清单整页显示 79）。
+    # 现场：背包里 7 顶塔盔（uhm，白装孔数随机但逐局相同），长按其中带孔的一顶；2 孔塔盔的首行是「知识」（欧特 21 + 索尔 27）→ max(59, 27) = 59
+    # rw1: all runes in the inventory - a long press on a 1-socket Cap does not open the list; a long press on a 2-socket Cap opens it; a tap outside the list closes it; long press again and tap "Craft" to make it, and the two runes leave the inventory
+    # rwlv run: "required level" in the list takes the base item's required level, not its item level (reported defect: the Spired Helm requires 59 with item level 79, and the whole page of the list showed 79).
+    # Scene: 7 Spired Helms in the inventory (uhm; socket counts of white items are random but the same every run), long press one with sockets; the first row for a 2-socket Spired Helm is Lore (Ort 21 + Sol 27) -> max(59, 27) = 59
+    g=G("rwlv","DM_TEST_GIVE=uhm:2:7@60 DM_TEST_GIVE_INV=1"); g.sect("rwlv",0); g.enter(); g.wait(2.0); g.tap("@menu",1.4)
+    g.item("长按背包里带孔的塔盔","弹清单，需要等级 59（看截图：每行都是 59）",r"长按 uhm[^\n]*需要等级 59",r"长按 uhm[^\n]*需要等级 79|【红】符文之语"); g.hold(395,267); g.wait(1.0); g.shot()
+    g.item("点清单外","清单关掉",r"清单外 → 关清单|清单关闭"); g.tap(P(120,200),1.5); g.shot()
+    gs.append(g)
     g=G("rw1",RWE+" DM_TEST_RW_LIST=75"); g.sect("rw1",0); g.enter(); g.wait(2.0); g.tap("@menu",1.4)
     g.item("背包布局","软帽、符文在 k 局同样的位置（看截图）",None); g.shot()
     g.item("长按 1 孔软帽","不开清单（1 孔帽子没有能做的符文之语）",None,LISTOK); g.hold(376,228); g.wait(1.0); g.shot()

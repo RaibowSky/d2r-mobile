@@ -9,6 +9,11 @@ static pthread_cond_t android_suspend_cv=PTHREAD_COND_INITIALIZER;
 static pthread_mutex_t android_lifecycle_mu=PTHREAD_MUTEX_INITIALIZER;
 static int android_suspended,android_inflight;
 static _Atomic uint64_t android_nvn_frame;
+/* Android translates on the caller before submitting to Vulkan. The upstream
+ * translation-queue boundary is already complete when these helpers run;
+ * GPU completion remains the responsibility of mtl_wait/finish/readback. */
+static void x_drain(void) {}
+static uint64_t x_fence(void) { return mtl_last_fence(); }
 static void android_gfx_enter(void) {
     pthread_mutex_lock(&android_suspend_mu);
     while(android_suspended)pthread_cond_wait(&android_suspend_cv,&android_suspend_mu);

@@ -1,0 +1,897 @@
+{
+  "date": "2026-10-16",
+  "base_commit": "511b45264713087435de98b79a72881f1e7209d4",
+  "upstream_commit": "9de307ecaff42b3c9d45e58992c848ee89b8f6a1",
+  "upstream_new_commits": 40,
+  "conflicted_files": 10,
+  "device_contacted": false,
+  "gpu_executed": false,
+  "game_executed": false,
+  "performance_claims_verified": false,
+  "build": {
+    "passed": true,
+    "ndk": "27.2.12479018",
+    "abi": "arm64-v8a",
+    "api": 29,
+    "type": "RelWithDebInfo",
+    "generated_romfs_samples_sha256": "928f8daa56f90d4dc1a6626cdf29ee3d2897a05e26efda0d5b8d6e3e23f72661",
+    "outputs": {
+      "libd2r_mobile_android.so": {
+        "bytes": 2755200,
+        "sha256": "bb84c9329b7eda4aae47572ead20740f9f187148206243b552767ec55565cbc2"
+      },
+      "dm_android_host_probe": {
+        "bytes": 1086216,
+        "sha256": "dc8c6462f4d3896b73fdfc790ef78c40b2f8ef012e6da3779607e90a0b0c83d2"
+      },
+      "dm_android_input_probe": {
+        "bytes": 965080,
+        "sha256": "300a0a2a06f0693b81e39aa411bbd1292ced128e4694ceba605aec869519e138"
+      },
+      "dm_android_vulkan_probe": {
+        "bytes": 215880,
+        "sha256": "98a8aec8c5f382b17d7ad453b762812dadaff2688b5d48b80ee52d28359b7c11"
+      }
+    },
+    "source_sha256": {
+      "dm/android/app_jni.c": "e619f17d8bc5333636a6e3b15053de7e8fb7d8db211d341b599595400de3a9a1",
+      "dm/android/audio_aaudio.h": "a6ee3ec9f81e20c77c9215244d656f78e72fffc9fd030aa2ddde1b1d026de734",
+      "dm/android/audio_aaudio.inc": "cc650196ea5207fe8a00450741cfa328e2de2d0e3b4f62c31cb5b952de151596",
+      "dm/android/codec_opus.c": "61fb9cdc206c89c8e05c8467a5281a496582165b433d2dd776be83ebbae380be",
+      "dm/android/diagnostics.c": "bc65064824908c4b299466f922141295b0c58aa16a39d3ba290b75c871985778",
+      "dm/android/game_resource_probe.c": "2d405955db302a23d38ab7c71a5ebf31531f78bbe3f0aeb7e605b3f9a53fb901",
+      "dm/android/gate_check.S": "403bf1b10f83f311c1f48002c670eb2d4f280c03c2d05c13bda7e5fa89b7ff64",
+      "dm/android/host_probe.c": "104ef92df469ad6e747c023d536074f1dd83263ff1abd2938e69ac3eadb5b54c",
+      "dm/android/input_backend.c": "9015c28c9732d410c0c4acd120564fa5b0dff70b61c846772db6005ef9043354",
+      "dm/android/input_backend.h": "71101d86d12da86af5ec8fae9660c948240f28f25653e7d39bbc60f693e3d8cb",
+      "dm/android/input_probe.c": "136f4d0eef7d444f4cff3b917706a56fa730c8fab19d38139bce5963145b6feb",
+      "dm/android/keyboard_android.c": "bba44116b2c29c4c17af4c3eff3d19a992ea459f7405c5ac3ee5b7aa9c6af8d9",
+      "dm/android/movie_start.c": "89f34010cb77f29e29baa961d788c958016dc13dc8362146b7e7c5256028a530",
+      "dm/android/nvn_platform_backend.h": "ef20ecc3c312e0c0f12bd7e6e1007e8b210e103818a2c53bfa91536a5e99a184",
+      "dm/android/nvn_platform_clock.c": "1007fbe122c616d60d03cfefa7bf4a002432c45cda576aa9cf0cc7bccd158e5b",
+      "dm/android/nvn_platform_clock.h": "8d4b7fcf8bce1e6fdd241b0f1cd6c69e1a7efb27e49012043573c37dcd8135e4",
+      "dm/android/nvn_platform_present.inc": "7e65f523c0a952bd753c3c50df1b9d00eee19fc55451e0465a46742b1a7bff52",
+      "dm/android/nvn_present_policy.h": "29a9af3fc9c6eba237dc383f8843831345e2807c2711faffa2d246c3f603f453",
+      "dm/android/romfs_image.c": "cf6ffc25308a163057f6b6a3b3d8694ae8a2e1771918ff4bc41b5ce20760b301",
+      "dm/android/romfs_image.h": "762eff2675cecd9df84477b27100b896f0183dd502d4a00c2d30b4eab06b8fe8",
+      "dm/android/services_fs.c": "5ab6de5dd36c0cd789a7a84389bdbcd680357fa0b8d93b9e18cf70e2cff36895",
+      "dm/android/services_fs.h": "459efaf3f7bf584b294375a815c49e7bdb660b4072c307ff6c1365d8c992617e",
+      "dm/android/services_fs_probe.c": "f7ca738d487909864112e83850ceceb93567d400b5c0603bf7712f6014522664",
+      "dm/android/services_platform.c": "11e67150e5a657f2f49e266c8531debb16f2e1f3b428c2d3fd47ea851491eb7e",
+      "dm/android/services_platform.h": "e1512c412e9aa01c01e084af1661c52ecb588a9840132287e8510ab37c5ce507",
+      "dm/android/services_sdk.c": "46b5642c0f5ae45815fadb94b547023a87683e3e36cdf81fa43d7ce21ef5edfa",
+      "dm/android/services_sdk.h": "5fed1fa07f9ca7abef60061ea92cca12e41a4362431b362d0709bcbfbe19e74e",
+      "dm/android/thread_slots.c": "3400404ee4e9a9a7f0461455a2424c14eb40d951ddc2323bc7a85a576fa69031",
+      "dm/android/thread_slots.h": "ba52428dcb059d79cc644546a8fc6d1b0c7705a2fab73bf795bdae9f13bb5062",
+      "dm/android/touch_controls_android.c": "facd53c72ec3074c0768a6c1ca7affdb5e439ccbd5775a1bc31c0d007266a66e",
+      "dm/android/vulkan_probe.c": "ef746c7619cc4592614df3548d547b87d3552c83ece36549ac84933764ed59cc",
+      "dm/gfx/hle_nv.c": "632d3ba03235c12fd6bf40c8d4689fe0cea91afff902b6c9a09170359efe983e",
+      "dm/gfx/hle_vi.c": "c8db8e1da99a8a9a07ef52824a1ee0b8b88238a144aa83c115d016714fcf96eb",
+      "dm/gfx/nvn/dmsh_chain.h": "21ef9be6df4d8dbcf53a54819eea04c97d8534553026199f128e506da9220944",
+      "dm/gfx/nvn/hle_nvn.c": "5cc48e5af8ca07d4db0ce625bb85dfaff5851ae0367b35d2745ade9399569e86",
+      "dm/gfx/nvn/nvn_builtin.h": "325b0b2003eb5f75d7c7fbb89a5660f7766dd0744cba93a6d615c98b56eeda5f",
+      "dm/gfx/nvn/nvn_count.h": "1ab2646d7047b21972a24c510563c3063b7772dd995cffba997cb7af46bffb38",
+      "dm/gfx/nvn/nvn_cover.h": "0919c6e4c326ebdee15dc73e580e432a9fe728db6e01bf97db9cec7561c13618",
+      "dm/gfx/nvn/nvn_dirty.c": "83bf2012751146dc2d7a56ecd2a8882d111d82ef8d44b891aadef156ad4f7113",
+      "dm/gfx/nvn/nvn_dirty.h": "fa1528c54dad93fb2578cfdd653c5d9f2ab11b7bff5883043d70a48982232b87",
+      "dm/gfx/nvn/nvn_dirty_summary.h": "a48f0a3b69e0c6ffb5901e0cbe95e38474e4d1ea8ea7fccc6ebb1260f3fd0473",
+      "dm/gfx/nvn/nvn_entry.S": "f3a0f3dbdcc6dd5001987f05d6fbcbe63f87967ff8d759938455a63283947f8a",
+      "dm/gfx/nvn/nvn_hmap.h": "7f9a982396d0c68b735a8c53c035102071330f05cc5b013fa53906e7110bd105",
+      "dm/gfx/nvn/nvn_mtl.h": "091c50a4241b06cd9568713d924611af759572e6ce449ee49fe30bf765244d20",
+      "dm/gfx/nvn/nvn_obj.h": "37257d613b740cd6d219eaeb169072b7cf6d5d387a85d60b567bf6ce59c83a44",
+      "dm/gfx/nvn/nvn_pace.h": "93ebab5a6b29c8a16d39ab7a2b5b57c9501b49b054fe3bcc69d17f312b8eb987",
+      "dm/gfx/nvn/nvn_protos.h": "8ed43efef06f467615a5e34c46314151a7c2cf5cd8cec35e451e71c5cf5c9326",
+      "dm/gfx/nvn/nvn_pso_skey.h": "47dafe89a4e75f1fd38852cb9d10c83f78c75b7d6bfad9fcfc2776096ab879ba",
+      "dm/gfx/nvn/nvn_refl.h": "0fec7b8d5e2ef60c01a30832e8279790b57aa910ccf282971d4c7ca3e771d388",
+      "dm/gfx/nvn/nvn_rtex.inc": "0a8e4406e0e88b5755db98ccd6e54e4d0e1c7c7a1ff5c0bf7eb5153b24d27513",
+      "dm/gfx/nvn/nvn_tex.c": "3e17092f016c03e19c9c325d9d0ec5618d503a8915d15684058f8adc16211df1",
+      "dm/gfx/nvn/nvn_tex.h": "7cefbd4042eb5ca982ae372d213adc7f3357426eb3bbbd08ec9f2e3375d3364a",
+      "dm/gfx/nvn/nvn_thunks.S": "5f090483dd014d67d39f2cb89fefa19c552c9d11d32dc50b90b1800355097d92",
+      "dm/gfx/nvn/nvn_vk.c": "113dd9813e3729128d8c66fd7a395d2f86d1ae1a8a10bdcdf8845d586124f4c6",
+      "dm/gfx/nvn/nvn_vk_binding_plan.h": "930d7b3355d47533d60a0b3c62fd60ca4a57a5c8b72281f322c6900b94308c9b",
+      "dm/gfx/nvn/nvn_vk_command_state.h": "9a8d6cc849b16c7d06466bd2c649377ce5ed2ed4020d3b3468c83d3df04e79eb",
+      "dm/gfx/nvn/nvn_vk_command_stream.h": "4cc48434084d202182fbeba12cce5bb480a1ebe6865e82ed69483981d24bdf0c",
+      "dm/gfx/nvn/nvn_vk_dispatch.h": "cc17020faa359c71656268bb7c40f9576cbcf063ad2738424b2ba6874a5de767",
+      "dm/gfx/nvn/nvn_vk_pool_upload.h": "20adb609dce50e18eda19dde1949ebedc0b063318c1449b704510886aa966320",
+      "dm/gfx/nvn/nvn_vk_storage_bias.h": "df05e0dffd6984ee4bf1ddc5e9f4d1c26fdc2d41d454927d2626f55f21abc28f",
+      "dm/gfx/nvn/nvn_vk_submission.h": "eeeb0e4183e94e4a1e973289b27c36e7b40a42ad13b28e65e4fdc6a858d75cbe",
+      "dm/gfx/nvn/nvn_vk_writeback_plan.h": "6142dbc1a44307abadb5baeb696d2dd678641e7440cda1b000ee229dc2bf37e6",
+      "dm/gfx/nvn/rt_range_check.inc": "f4e320669220d0a4d6d76c44c8b2df146e8786c857300ac2350919c53bb2e92c",
+      "dm/gfx/tex/nvn_bcdec.c": "52d5f214a0abda987f445316ed41a9db7eca85040325b4de9543e79033cfb17e",
+      "dm/gfx/tex/nvn_bcdec.h": "86ef7ec89dacccfbd3425b28cfc33b3d07fe91b837757fa7e59c906e2aa1da16",
+      "dm/gfx/tex/nvn_deswizzle.c": "5452d6bf1802bf1cf3feabd3f887312c48fc4728580b19155068d9e5c159996a",
+      "dm/gfx/tex/nvn_deswizzle.h": "712778f4b0b66f0e0b9fe086bd20a2c4d95e71f10156b07ea414af4720361b35",
+      "dm/gfx/tex/nvn_deswizzle_gpu.h": "600047e5aa4141c3eede5e5bb28d34705708e78051ce25747192ab8b4be5aa2a",
+      "dm/gfx/tex/nvn_fmt_mtl.h": "dc5e3c2712cac325d01b0f40134818249b9528062d19d657f3f7feb6d97ad136",
+      "dm/host/dm.h": "5c555559268e4a9b20ff52e469088b7e8ef2b68540f80c0e7c57c01740702973",
+      "dm/host/dm_actions.h": "3179102096f171101265f72816317c38fa832d6c48571f9a432ef24688c16e64",
+      "dm/host/dm_bossrush.h": "c3eec13c023264d31c9c14be27f6cd3286022608859f4799fa69f668905d383c",
+      "dm/host/dm_cursor.h": "eb285fb809cdab505dbf46a9e77819623cc66221484772b55024bedf921468b6",
+      "dm/host/dm_cursor_item.h": "9a21832799ceb02c0c32d22969059c542d258acf05d37537e38d28d516731d56",
+      "dm/host/dm_custom.h": "b8ee34ae355fdbccb25ba3ffcddac064252c69e86dab5290d9d3cf01978f117d",
+      "dm/host/dm_derived_rt.h": "cb26988f208525129cfb20d17a7aaa12f5ef9ece63a97b86f2242a6ac2542c3e",
+      "dm/host/dm_doorspot.h": "bfc77dd795e0c4b3bc36271ee2372deae183e9e0dce352b301b92cf43f551b4d",
+      "dm/host/dm_elysium.h": "4f7b7d355b2f7a621c3ed63759930d24ffbab332e8be82e03033c3f1bd87e269",
+      "dm/host/dm_hud.h": "cc9d80c6b59c52317ed2257ef17c57fc55be4c29489d474f7b16b6ab4720ca60",
+      "dm/host/dm_i18n.h": "854e86670847ad181d35dfe7431916c3ff909aab649d72e3a55f1eb81a1c5e85",
+      "dm/host/dm_i18n_tab.h": "d8abb9435634b9fd5e7eca0da17830eef43e5385944014e7c3f2a09ab9bd2c19",
+      "dm/host/dm_input.h": "e56eaf41e81d4ea1e44039b73d7d6caa1761b308eb584cd85c6e83899b0f1ed0",
+      "dm/host/dm_mode_items.h": "ce97042a22676d78d3841d48a8caac6862dcfc0042636110f3229aa071e151d3",
+      "dm/host/dm_modetx.h": "ce07e106781fa84f89af72a73e9c73af86015bdede42d8db78b989002d9ce470",
+      "dm/host/dm_padmap.h": "515e7c1c19be9b06b3ed9241589fc463f329d572321d37116099530e4b018806",
+      "dm/host/dm_prof.h": "1a05101bf1c3fda95325761c84ddf9ecec687728967772484ce28bb233140792",
+      "dm/host/dm_rift.h": "bd3896b059953fa3a2646958a6e9e1205128a570b2cb39827caf5ef0d198ded9",
+      "dm/host/dm_rwlv_core.h": "15ff907baf8a66332f19de5601e23fea198070553b1a0f50521ca55cf5ce41a8",
+      "dm/host/dm_textbox_core.h": "2ba5fece8c133c5297265a06b6e7938ba8752b3fc4c4bded985fa7822ce5f4f4",
+      "dm/host/dm_uiscreen.h": "d18efa145d97cc2d6ce90fdd51c946fa78e4cc3cb0d986dedf176368e82bfd7c",
+      "dm/host/dm_unit.h": "98d8d2f518c1abc26fed24f5e525e1cb103a5c8ca4cff741413c7b0d203cfddc",
+      "dm/host/dm_widget.h": "cbcc0de078de40ff8bdcd55a37cadc53889d0ccf234cb80045d4130b23420f30",
+      "dm/host/dm_world.h": "77ef306619be3bf09fcbfb200db4a50a6720cc49cfc93826dded68f604b97207",
+      "dm/host/entry.S": "eac84e2061084cb47eba0c127184e8419ee1f586a1ce0030b7724577db5a69e4",
+      "dm/host/front.h": "aca78d7bc96c5ab5d009314ac5489cf4a0d9a106f28d57f133edca445c796797",
+      "dm/host/hle.c": "615abf2838f43483b67a3b867d11545520e51675e8d61de1d75552def5a101b3",
+      "dm/host/hle.h": "36da8927149a6ba63a141615b39369e56ff6c7c2e7f4338eef840351215bdb17",
+      "dm/host/hle_account.c": "0c2156fcc388e3695fcaa830e24db0e9e19726984806f68a03376ff81f39d44c",
+      "dm/host/hle_audio.c": "271a9ae5d93919788116e7c3e7c69cad6274dc6471be91faede9aca8c31ae5c6",
+      "dm/host/hle_friends.c": "f43ef5e883344d9f38b34dbce2dbbf6deb4849185e8d30d84bdd761759277a4c",
+      "dm/host/hle_fs.c": "3231d90a5c0b9963bf3190855cfd249bf7b36620a444309bab282c6c0f8c6fc1",
+      "dm/host/hle_guestthread.c": "d348b32bf440f3f7ca438c42735727c7ba2101dfb02a9770dff5ada3430779c8",
+      "dm/host/hle_hid.c": "0d5598041fbcdc08a3af124f55bbc14728d0f8a189a9c102c6b8d5269342484a",
+      "dm/host/hle_lifecycle.c": "f9bd348789a0be705e1761bc2e59ea80fb9f78abe3433f904c17e7a3ada3d071",
+      "dm/host/hle_misc.c": "07e6dc731b0ee4ce4221daf06a0dbaddb457c15a5825a8d604f501ec58ea23c2",
+      "dm/host/hle_net.c": "e796663cdc84e4a70d90daf23b180e3078e697f261b5fb0d20434edfe964e23b",
+      "dm/host/hle_oe.c": "f2e7821f379e7370ac24a1dfcf0bb6f02821445a20d9214e8cac2b4192a16a66",
+      "dm/host/hle_os.c": "080d2e8f8a4152070684b54c51f3ef7798b8d29d12c7d009637793e024bcb122",
+      "dm/host/hle_sdkinit.c": "ff765050f82f080ea540936a3d7ffe318ce7bd7c94ffcd70c086e042a7505f3e",
+      "dm/host/hle_svc.c": "bf4eefffebaa08bbf3809347d22d6d37f23bc0cf5748e23a71e6dd7142b221e0",
+      "dm/host/hle_swkbd.c": "40e0f659f514d777dd1bd5c83e5808af939000b4533f5d4ff045cdfd955f6867",
+      "dm/host/hle_thread.c": "eb64af66c2d583edb84183e7682739a3759fc98dba9870a1acf869a5f666ae94",
+      "dm/host/hle_time.c": "0e3fd622b52d7955cee0e20ffdcec6a1a48642f21342ea83d2c1de489ae94f9f",
+      "dm/host/hle_touch.c": "29d397373f7063c393e099661c96ef3c00dbb1a43808211785c8408b6e645d03",
+      "dm/host/loader.c": "2897293597ebb6b3a4f76f53395140e6fdea6990984c496556f27315f9c3422b",
+      "dm/host/romfs_validate.h": "b43eaa7d727a2b6a8d24c03302cc5ac568554ff1fae8c944f32fd20608a4b066",
+      "dm/host/thread.c": "cb7dd07f79cb463a30eca0c8b222341404115661370c1dd427e1c2f9465002a6",
+      "dm/host/touch_mac.h": "b0ea6c2d57e25bc476809a027412daf0bb34eccf24a652772467e4dd511c1c03",
+      "dm/ios/Sources/asset_dl.h": "b818c481d26c17422b21b0aa23e10d8ac67da9f26d4b63703872c7e9dd1f45b2",
+      "dm/ios/Sources/dm_metal_cache_guard.h": "3bf2ef8f36d4c16f9303df644d11e0dad35a6485ff80acccc7e802004d67e103",
+      "dm/ios/Sources/dm_touch_controls.c": "1bf2d6eccb4fb9a6ca21d5969cead288f26e72b7d8bd1e42016e2c63572aba50",
+      "dm/ios/Sources/dm_touch_controls.h": "49a4f201884e504d75318bef59c014f1c2298866062d8f2d229273c23e0e7870",
+      "dm/ios/Sources/dm_touch_game_identity.h": "6726f57f1f63c035e5ebea9c0d4a1b753ed634f5a4ae9074d4cc726f84455b72",
+      "dm/ios/Sources/dm_touch_game_state.h": "df34f7e445dfdef6ef6af0eedfb1c16740ceda231893f3255cc8d3089b4a8737",
+      "dm/ios/Sources/dm_touch_native_art.h": "eccb0f07876dc5737e8ca6c36087033f424f80eb7ce15958097742e3f50c8171",
+      "dm/ios/Sources/DmTouchOverlay.h": "1b7680e87e3ddf40b347dd4c903c78af349aaa0534b111a47b9d9031da4ff0df"
+    }
+  },
+  "host_checks": [
+    {
+      "test": "pace",
+      "arguments": [],
+      "passed": true,
+      "last_line": "== 23 项，失败 0 =="
+    },
+    {
+      "test": "present",
+      "arguments": [],
+      "passed": true,
+      "last_line": "ANDROID_PRESENT_POLICY checks=37240 legacy_equal=1 fixed60=1 paced_frames=600 stall_recovery=1 passed=1"
+    },
+    {
+      "test": "dirty-race",
+      "arguments": [],
+      "passed": true,
+      "last_line": "t_dirty_race：全通"
+    },
+    {
+      "test": "dirty-slots",
+      "arguments": [],
+      "passed": true,
+      "last_line": "未跟踪范围不漏字节                          期望 7    → 真结果 7    ✓"
+    },
+    {
+      "test": "dirty-summary",
+      "arguments": [
+        "tracker",
+        "0"
+      ],
+      "passed": true,
+      "last_line": "{\"passed\":true,\"summary_enabled\":false,\"comparisons\":166574,\"real_fault_and_prepare\":true,\"concurrent_writers\":4,\"concurrent_rounds\":1000,\"real_concurrent_fault_rounds\":64,\"query_calls\":37015,\"page_reads\":1100989,\"block_reads\":0,\"skipped_pages\":0,\"gpu_executed\":false}"
+    },
+    {
+      "test": "dirty-summary",
+      "arguments": [
+        "tracker",
+        "1"
+      ],
+      "passed": true,
+      "last_line": "{\"passed\":true,\"summary_enabled\":true,\"comparisons\":166574,\"real_fault_and_prepare\":true,\"concurrent_writers\":4,\"concurrent_rounds\":1000,\"real_concurrent_fault_rounds\":64,\"query_calls\":37015,\"page_reads\":218237,\"block_reads\":49254,\"skipped_pages\":882752,\"gpu_executed\":false}"
+    },
+    {
+      "test": "dirty-summary",
+      "arguments": [
+        "properties",
+        "1"
+      ],
+      "passed": true,
+      "last_line": "{\"passed\":true,\"comparisons\":129563,\"concurrent_writers\":4,\"concurrent_rounds\":1000,\"gpu_executed\":false}"
+    },
+    {
+      "test": "touch",
+      "arguments": [],
+      "passed": true,
+      "last_line": "PASS 47/47 cases; 1599/1599 checks"
+    },
+    {
+      "test": "thread-lifetime",
+      "arguments": [],
+      "passed": true,
+      "last_line": "ANDROID_THREAD_LIFETIME threads=200 explicit_detach=100 pthread_exit=100 allocations=800 releases=800 passed=1"
+    },
+    {
+      "test": "save-recovery",
+      "arguments": [
+        "/mnt/d/AndroidSwitch/build/android-measured-optimizations/merge-checks/save-recovery.json"
+      ],
+      "passed": true,
+      "last_line": "SAVE_RECOVERY checks=66 failures=0 host_linux=1"
+    }
+  ],
+  "rewriter_fixture": {
+    "schema": 1,
+    "passed": true,
+    "rewriter_sha256": "4f8b65a76436cd5958b666808a7cb922c70a6e8652fcc82c2ec240e06686777c",
+    "cases": [
+      {
+        "name": "mov_sp",
+        "assembly": "mov x18, sp",
+        "kind": "plain",
+        "patch_bytes": 64,
+        "trials": 8,
+        "passed": true,
+        "failures": []
+      },
+      {
+        "name": "add_sp",
+        "assembly": "add x18, sp, #64",
+        "kind": "plain",
+        "patch_bytes": 64,
+        "trials": 8,
+        "passed": true,
+        "failures": []
+      },
+      {
+        "name": "load_sp",
+        "assembly": "ldr x18, [sp, #32]",
+        "kind": "plain",
+        "patch_bytes": 64,
+        "trials": 8,
+        "passed": true,
+        "failures": []
+      },
+      {
+        "name": "store_sp",
+        "assembly": "str x18, [sp, #16]",
+        "kind": "plain",
+        "patch_bytes": 64,
+        "trials": 8,
+        "passed": true,
+        "failures": []
+      },
+      {
+        "name": "push_sp",
+        "assembly": "stp x18, x19, [sp, #-96]!",
+        "kind": "plain",
+        "patch_bytes": 64,
+        "trials": 8,
+        "passed": true,
+        "failures": []
+      },
+      {
+        "name": "pop_sp",
+        "assembly": "ldp x18, x19, [sp], #96",
+        "kind": "plain",
+        "patch_bytes": 64,
+        "trials": 8,
+        "passed": true,
+        "failures": []
+      },
+      {
+        "name": "negative_sp",
+        "assembly": "stur x18, [sp, #-32]",
+        "kind": "plain",
+        "patch_bytes": 64,
+        "trials": 8,
+        "passed": true,
+        "failures": []
+      },
+      {
+        "name": "flags",
+        "assembly": "adds w18, w18, #1",
+        "kind": "plain",
+        "patch_bytes": 48,
+        "trials": 8,
+        "passed": true,
+        "failures": []
+      },
+      {
+        "name": "cond_zero",
+        "assembly": "cbz w18, .+16",
+        "kind": "cond",
+        "patch_bytes": 48,
+        "trials": 8,
+        "passed": true,
+        "failures": []
+      },
+      {
+        "name": "cond_bit",
+        "assembly": "tbnz x18, #32, .+16",
+        "kind": "cond",
+        "patch_bytes": 48,
+        "trials": 8,
+        "passed": true,
+        "failures": []
+      },
+      {
+        "name": "adr",
+        "assembly": "adr x18, .+32",
+        "kind": "pcrel",
+        "patch_bytes": 44,
+        "trials": 8,
+        "passed": true,
+        "failures": []
+      },
+      {
+        "name": "jump",
+        "assembly": "br x18",
+        "kind": "jump",
+        "patch_bytes": 144,
+        "trials": 8,
+        "passed": true,
+        "failures": []
+      },
+      {
+        "name": "tp0",
+        "assembly": "mrs x0, tpidr_el0",
+        "kind": "read",
+        "patch_bytes": 36,
+        "trials": 8,
+        "passed": true,
+        "failures": []
+      },
+      {
+        "name": "tp16",
+        "assembly": "mrs x16, tpidr_el0",
+        "kind": "read",
+        "patch_bytes": 36,
+        "trials": 8,
+        "passed": true,
+        "failures": []
+      },
+      {
+        "name": "tp18",
+        "assembly": "mrs x18, tpidr_el0",
+        "kind": "read",
+        "patch_bytes": 68,
+        "trials": 8,
+        "passed": true,
+        "failures": []
+      },
+      {
+        "name": "tpzr",
+        "assembly": "mrs xzr, tpidr_el0",
+        "kind": "read",
+        "patch_bytes": 4,
+        "trials": 8,
+        "passed": true,
+        "failures": []
+      },
+      {
+        "name": "tlr18",
+        "assembly": "mrs x18, tpidrro_el0",
+        "kind": "read",
+        "patch_bytes": 68,
+        "trials": 8,
+        "passed": true,
+        "failures": []
+      },
+      {
+        "name": "write0",
+        "assembly": "msr tpidr_el0, x0",
+        "kind": "write",
+        "patch_bytes": 36,
+        "trials": 8,
+        "passed": true,
+        "failures": []
+      },
+      {
+        "name": "write18",
+        "assembly": "msr tpidr_el0, x18",
+        "kind": "write",
+        "patch_bytes": 68,
+        "trials": 8,
+        "passed": true,
+        "failures": []
+      },
+      {
+        "name": "writezr",
+        "assembly": "msr tpidr_el0, xzr",
+        "kind": "write",
+        "patch_bytes": 36,
+        "trials": 8,
+        "passed": true,
+        "failures": []
+      },
+      {
+        "name": "param",
+        "assembly": "mrs x19, tpidr_el0",
+        "kind": "read",
+        "patch_bytes": 36,
+        "trials": 8,
+        "passed": true,
+        "failures": []
+      },
+      {
+        "name": "svc",
+        "assembly": "svc #0x26",
+        "kind": "gate",
+        "patch_bytes": 44,
+        "trials": 8,
+        "passed": true,
+        "failures": []
+      },
+      {
+        "name": "timer",
+        "assembly": "mrs x3, cntpct_el0",
+        "kind": "gate",
+        "patch_bytes": 44,
+        "trials": 8,
+        "passed": true,
+        "failures": []
+      },
+      {
+        "name": "observation",
+        "assembly": "sub sp, sp, #64",
+        "kind": "obs",
+        "patch_bytes": 48,
+        "trials": 8,
+        "passed": true,
+        "failures": []
+      },
+      {
+        "name": "exclusive",
+        "assembly": "ldaxr x0, [x18]\nadd x0, x0, #1\nstlxr w2, x0, [x18]\ncbnz w2, .-12",
+        "kind": "window",
+        "patch_bytes": 60,
+        "trials": 8,
+        "passed": true,
+        "failures": []
+      },
+      {
+        "name": "exclusive_sp",
+        "assembly": "ldaxr x0, [x18]\nldr x4, [sp, #16]\nadd x0, x0, x4\nstlxr w2, x0, [x18]\ncbnz w2, .-16",
+        "kind": "window",
+        "patch_bytes": 72,
+        "trials": 8,
+        "passed": true,
+        "failures": []
+      }
+    ],
+    "explicit_rejections": [
+      {
+        "name": "dynamic_sp",
+        "rejected": true,
+        "reason": "Android dynamic SP-indexed access unsupported: 1000 x18, [sp, x0]"
+      },
+      {
+        "name": "set_sp",
+        "rejected": true,
+        "reason": "writes sp: 1000 sp, x18"
+      }
+    ],
+    "apple_template_compatibility": [
+      {
+        "name": "mov_sp",
+        "identical": true
+      },
+      {
+        "name": "add_sp",
+        "identical": true
+      },
+      {
+        "name": "load_sp",
+        "identical": true
+      },
+      {
+        "name": "store_sp",
+        "identical": true
+      },
+      {
+        "name": "push_sp",
+        "identical": true
+      },
+      {
+        "name": "pop_sp",
+        "identical": true
+      },
+      {
+        "name": "negative_sp",
+        "identical": true
+      },
+      {
+        "name": "flags",
+        "identical": true
+      },
+      {
+        "name": "cond_zero",
+        "identical": true
+      },
+      {
+        "name": "cond_bit",
+        "identical": true
+      },
+      {
+        "name": "adr",
+        "identical": true
+      },
+      {
+        "name": "jump",
+        "identical": true
+      },
+      {
+        "name": "tp0",
+        "identical": true
+      },
+      {
+        "name": "tp16",
+        "identical": true
+      },
+      {
+        "name": "tp18",
+        "identical": true
+      },
+      {
+        "name": "tpzr",
+        "identical": true
+      },
+      {
+        "name": "tlr18",
+        "identical": true
+      },
+      {
+        "name": "write0",
+        "identical": true
+      },
+      {
+        "name": "write18",
+        "identical": true
+      },
+      {
+        "name": "writezr",
+        "identical": true
+      },
+      {
+        "name": "param",
+        "identical": true
+      },
+      {
+        "name": "svc",
+        "identical": true
+      },
+      {
+        "name": "timer",
+        "identical": true
+      },
+      {
+        "name": "observation",
+        "identical": true
+      },
+      {
+        "name": "exclusive",
+        "identical": true
+      },
+      {
+        "name": "exclusive_sp",
+        "identical": true
+      }
+    ],
+    "limits": [
+      "Synthetic gate host behavior is a controlled fixture, not a verification of native C/assembly gate dispatch.",
+      "Unicorn exclusive operations are exercised without concurrent threads; this does not prove scheduling/exclusive-monitor behavior on Android."
+    ]
+  },
+  "rewriter_external_exits": {
+    "passed": true,
+    "trials": 32,
+    "device_contacted": false,
+    "tests": [
+      {
+        "case": "external_exit",
+        "equal": false,
+        "seed": 0,
+        "passed": true,
+        "old_exit_order_rejected": true,
+        "differences": [],
+        "errors": []
+      },
+      {
+        "case": "external_exit",
+        "equal": false,
+        "seed": 1,
+        "passed": true,
+        "old_exit_order_rejected": true,
+        "differences": [],
+        "errors": []
+      },
+      {
+        "case": "external_exit",
+        "equal": false,
+        "seed": 2,
+        "passed": true,
+        "old_exit_order_rejected": true,
+        "differences": [],
+        "errors": []
+      },
+      {
+        "case": "external_exit",
+        "equal": false,
+        "seed": 3,
+        "passed": true,
+        "old_exit_order_rejected": true,
+        "differences": [],
+        "errors": []
+      },
+      {
+        "case": "external_exit",
+        "equal": false,
+        "seed": 4,
+        "passed": true,
+        "old_exit_order_rejected": true,
+        "differences": [],
+        "errors": []
+      },
+      {
+        "case": "external_exit",
+        "equal": false,
+        "seed": 5,
+        "passed": true,
+        "old_exit_order_rejected": true,
+        "differences": [],
+        "errors": []
+      },
+      {
+        "case": "external_exit",
+        "equal": false,
+        "seed": 6,
+        "passed": true,
+        "old_exit_order_rejected": true,
+        "differences": [],
+        "errors": []
+      },
+      {
+        "case": "external_exit",
+        "equal": false,
+        "seed": 7,
+        "passed": true,
+        "old_exit_order_rejected": true,
+        "differences": [],
+        "errors": []
+      },
+      {
+        "case": "external_exit",
+        "equal": true,
+        "seed": 0,
+        "passed": true,
+        "old_exit_order_rejected": true,
+        "differences": [],
+        "errors": []
+      },
+      {
+        "case": "external_exit",
+        "equal": true,
+        "seed": 1,
+        "passed": true,
+        "old_exit_order_rejected": true,
+        "differences": [],
+        "errors": []
+      },
+      {
+        "case": "external_exit",
+        "equal": true,
+        "seed": 2,
+        "passed": true,
+        "old_exit_order_rejected": true,
+        "differences": [],
+        "errors": []
+      },
+      {
+        "case": "external_exit",
+        "equal": true,
+        "seed": 3,
+        "passed": true,
+        "old_exit_order_rejected": true,
+        "differences": [],
+        "errors": []
+      },
+      {
+        "case": "external_exit",
+        "equal": true,
+        "seed": 4,
+        "passed": true,
+        "old_exit_order_rejected": true,
+        "differences": [],
+        "errors": []
+      },
+      {
+        "case": "external_exit",
+        "equal": true,
+        "seed": 5,
+        "passed": true,
+        "old_exit_order_rejected": true,
+        "differences": [],
+        "errors": []
+      },
+      {
+        "case": "external_exit",
+        "equal": true,
+        "seed": 6,
+        "passed": true,
+        "old_exit_order_rejected": true,
+        "differences": [],
+        "errors": []
+      },
+      {
+        "case": "external_exit",
+        "equal": true,
+        "seed": 7,
+        "passed": true,
+        "old_exit_order_rejected": true,
+        "differences": [],
+        "errors": []
+      },
+      {
+        "case": "external_exit_sp",
+        "equal": false,
+        "seed": 0,
+        "passed": true,
+        "old_exit_order_rejected": true,
+        "differences": [],
+        "errors": []
+      },
+      {
+        "case": "external_exit_sp",
+        "equal": false,
+        "seed": 1,
+        "passed": true,
+        "old_exit_order_rejected": true,
+        "differences": [],
+        "errors": []
+      },
+      {
+        "case": "external_exit_sp",
+        "equal": false,
+        "seed": 2,
+        "passed": true,
+        "old_exit_order_rejected": true,
+        "differences": [],
+        "errors": []
+      },
+      {
+        "case": "external_exit_sp",
+        "equal": false,
+        "seed": 3,
+        "passed": true,
+        "old_exit_order_rejected": true,
+        "differences": [],
+        "errors": []
+      },
+      {
+        "case": "external_exit_sp",
+        "equal": false,
+        "seed": 4,
+        "passed": true,
+        "old_exit_order_rejected": true,
+        "differences": [],
+        "errors": []
+      },
+      {
+        "case": "external_exit_sp",
+        "equal": false,
+        "seed": 5,
+        "passed": true,
+        "old_exit_order_rejected": true,
+        "differences": [],
+        "errors": []
+      },
+      {
+        "case": "external_exit_sp",
+        "equal": false,
+        "seed": 6,
+        "passed": true,
+        "old_exit_order_rejected": true,
+        "differences": [],
+        "errors": []
+      },
+      {
+        "case": "external_exit_sp",
+        "equal": false,
+        "seed": 7,
+        "passed": true,
+        "old_exit_order_rejected": true,
+        "differences": [],
+        "errors": []
+      },
+      {
+        "case": "external_exit_sp",
+        "equal": true,
+        "seed": 0,
+        "passed": true,
+        "old_exit_order_rejected": true,
+        "differences": [],
+        "errors": []
+      },
+      {
+        "case": "external_exit_sp",
+        "equal": true,
+        "seed": 1,
+        "passed": true,
+        "old_exit_order_rejected": true,
+        "differences": [],
+        "errors": []
+      },
+      {
+        "case": "external_exit_sp",
+        "equal": true,
+        "seed": 2,
+        "passed": true,
+        "old_exit_order_rejected": true,
+        "differences": [],
+        "errors": []
+      },
+      {
+        "case": "external_exit_sp",
+        "equal": true,
+        "seed": 3,
+        "passed": true,
+        "old_exit_order_rejected": true,
+        "differences": [],
+        "errors": []
+      },
+      {
+        "case": "external_exit_sp",
+        "equal": true,
+        "seed": 4,
+        "passed": true,
+        "old_exit_order_rejected": true,
+        "differences": [],
+        "errors": []
+      },
+      {
+        "case": "external_exit_sp",
+        "equal": true,
+        "seed": 5,
+        "passed": true,
+        "old_exit_order_rejected": true,
+        "differences": [],
+        "errors": []
+      },
+      {
+        "case": "external_exit_sp",
+        "equal": true,
+        "seed": 6,
+        "passed": true,
+        "old_exit_order_rejected": true,
+        "differences": [],
+        "errors": []
+      },
+      {
+        "case": "external_exit_sp",
+        "equal": true,
+        "seed": 7,
+        "passed": true,
+        "old_exit_order_rejected": true,
+        "differences": [],
+        "errors": []
+      }
+    ]
+  },
+  "host_checks_receipt_sha256": "3ba36b208efd2a8e0dfd6810de64dedae4dba2233e1c74da852a9bc76812e8d7"
+}

@@ -11,7 +11,7 @@ set -u
 TOOLS=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd); export DM_ROOT=${DM_ROOT:-$HOME/dm-work}
 source "$TOOLS/local_env.sh"; local_env_need DM_BUNDLE_ID || exit 1
 B=$DM_BUNDLE_ID; DST=$DM_ROOT/data/switch/save_ref_warlock/0000000000000001/0
-[ -d "$DST" ] && { echo "已有标准存档 $DST，不覆盖"; exit 0; }
+[ -d "$DST" ] && { echo "已有标准存档 ${DST}，不覆盖"; exit 0; }
 GAME=${SMOKE_MAC_ROMFS:-$DM_ROOT/data/switch/3.3.94012/Update/RomFS/data}
 [ -f "$GAME/.build.config" ] || { echo "✗ 没有游戏资源 $GAME"; exit 1; }
 W=$(SMOKE_MAC_PKG_ONLY=1 bash "$TOOLS/smoke_mac.sh" 1 2>&1 | sed -n 's/^SMOKE-MAC 只出包 //p' | tail -1)
@@ -36,12 +36,16 @@ port=$(python3 -c "import socket;s=socket.socket();s.bind(('127.0.0.1',0));print
     '43.00 down 0 167,193' '43.12 up 0' '46.00 type Second' '47.00 alert ok' '55.00 pos' \
     '57.00 down 0 @menu' '57.12 up 0' '58.50 down 0 551,17' '58.62 up 0' '59.60 tap_ui Exit@PauseLayoutGarden 3' '67.00 note 存档完成'; } > "$C/Documents/fixture_touch.txt"
 caffeinate -u -t 3 > /dev/null 2>&1
-open -n "$W" --env DM_GAME_RES=2868x1320 --env DM_TEST_SAFE_L=62 --env DM_TEST_SAFE_R=62 --env DM_TOUCH_REF=667x375 --env DM_SAVE_FRESH=empty --env DM_LOG_PORT="$port" --env DM_UIMSG=1 \
+# DM_PRESENT_LINK=0：出图不等系统的显示节拍、自己取画布。这台 Mac 上游戏窗口被别的窗口完全盖住时系统不发显示节拍，画面会停住并报
+# 「显示节拍激活中连续 2.0 秒没回调」，脚本就走不下去——与冒烟脚本 smoke_mac.sh 在本机的做法相同。
+# DM_PRESENT_LINK=0: present without waiting for the system display link, acquiring the drawable ourselves. On a Mac, when the game window is completely covered by another window the system
+# sends no display-link callbacks, the picture stops and "display link active but no callback for 2.0 s" is reported, and the script cannot go on -- the same thing smoke_mac.sh does on a local machine.
+open -n "$W" --env DM_PRESENT_LINK=0 --env DM_GAME_RES=2868x1320 --env DM_TEST_SAFE_L=62 --env DM_TEST_SAFE_R=62 --env DM_TOUCH_REF=667x375 --env DM_SAVE_FRESH=empty --env DM_LOG_PORT="$port" --env DM_UIMSG=1 \
   --env DM_TOUCH_SCRIPT=fixture_touch.txt --env DM_TOUCH_SCRIPT_START=menu --env DM_GAME_SEED=0x12345678 --env DM_FIXED_TIME=1790000000 --args -mode boot
 r=$(python3 "$TOOLS/logport.py" until "$port" "$LOG" 160 '[script] 全部')   # 等触点脚本走完（建角、进局、保存并退出）；之后让 App 自己退出 | Wait for the touch point script to finish (create a character, enter the game, save and exit); then let the App quit by itself
 for _ in $(seq 1 20); do [ -z "$(pids)" ] && break; sleep 0.5; done; for p in $(pids); do kill -TERM "$p"; done
-case "$r" in result=0*) ;; *) echo "✗ 没走到建角进局（$r），日志 $LOG"; exit 1;; esac
+case "$r" in result=0*) ;; *) echo "✗ 没走到建角进局（${r}），日志 $LOG"; exit 1;; esac
 LC_ALL=C grep -a -q '【红】' "$LOG" && { echo "✗ 触点脚本有一步没走成：$(LC_ALL=C grep -a '【红】' "$LOG" | head -1 | cut -c1-120)，日志 $LOG"; exit 1; }
 n=$(find "$C/Documents/save.test" -name '*.d2s' 2> /dev/null | wc -l | tr -d ' ')
 [ "$n" -ge 2 ] || { echo "✗ 存档目录里只有 $n 个角色文件（要 2 个），日志 $LOG"; exit 1; }
-mkdir -p "$DST" && cp -R "$C/Documents/save.test/." "$DST/" && chmod -R u+w "$DST" && echo "标准存档已生成：$DST（$n 个角色）。重新出 App（run.sh build）后冒烟即可用"
+mkdir -p "$DST" && cp -R "$C/Documents/save.test/." "$DST/" && chmod -R u+w "$DST" && echo "标准存档已生成：${DST}（$n 个角色）。重新出 App（run.sh build）后冒烟即可用"
