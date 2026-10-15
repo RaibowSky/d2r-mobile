@@ -1,12 +1,35 @@
 # D2R Mobile
 
-**开源的《暗黑破坏神 II：狱火重生》术士君临 iOS 兼容层。** 把你自己购买的 Nintendo Switch 版游戏（含「术士君临」资料片）完整带到 iPhone 和 iPad 上：原版内核原生执行，整套操作为触屏重做，稳定 60 帧，一秒进局。
+**开源的《暗黑破坏神 II：狱火重生》术士君临兼容层，支持 iOS，并正在开发 Android 移植。** iOS 版把你自己购买的 Nintendo Switch 版游戏（含「术士君临」资料片）完整带到 iPhone 和 iPad 上：原版内核原生执行，整套操作为触屏重做，稳定 60 帧，一秒进局。Android 的进度与验证范围单独列在下方。
 
-这不是一个「勉强能跑」的技术演示，而是一个打磨到可以天天玩、从开荒一路玩到终局的移动版。
+iOS 版已打磨到可以天天玩、从开荒一路玩到终局；Android 版仍处于开发阶段。
 
-平台：iPhone / iPad（iOS 26 起）· 游戏版本：Switch 版「术士君临」3.3.94012 · 中文 / English · 许可证：MIT · **需要自备游戏文件**
+平台：iPhone / iPad（iOS 26 起）；Android（实验性，arm64-v8a、API 29+、Vulkan）· 游戏版本：Switch 版「术士君临」3.3.94012 · 中文 / English · 许可证：MIT · **需要自备游戏文件**
 
 English: [README.md](README.md)
+
+## Android 支持（实验性）
+
+截至 **2026-10-15**，本分支已通过原生 ARM64 宿主与 Vulkan 实现的 NVN 图形接口，在 Android 真机上运行原版游戏。已验证选角、进入镇内、触屏操作、背包与选项菜单、基础近战、第一幕营地与荒地往返，以及存档退出后冷启动重入。
+
+| 测试配置 | 观测性能 |
+|---|---|
+| ROD-W09、Mali-G610 MC6、render scale 1.0、单个已保存圣骑士的选角场景 | 1,200 帧平均 **24.08 FPS** |
+| 同一设备与比例，加载结束后镇内静止 | 900 帧平均 **28.56 FPS** |
+
+这是特定场景的观测值，不代表持续性能或其他设备的表现；**选角 30 FPS 的目标尚未达到**。后续低电量采样曾下降到 21–22 FPS，未将其作为代码退化或优化收益的依据。长时间热稳定性与耗电尚未验证。
+
+本分支已实现的工作：
+
+- [Android 宿主与 App](dm/android/)：原生游戏装载、平台服务、文件与存档访问、AAudio 接入、触屏输入和 Android Activity。原生构建面向 Android API 29+ / arm64-v8a，这不代表所有满足最低版本的设备都已兼容。
+- [Vulkan 渲染器](dm/gfx/nvn/nvn_vk.c)：精确资源同步、分块提前提交、异步完成、缓存写回暂存、分离 mip 采样的逐级图像布局、shader control 缓存，以及可选的详细性能诊断。
+- 已提交优化基线通过 **16 项 GPU fixture** 和上述玩法冒烟复核。动态 uniform 描述符已试验，因 FPS 收益无法复现而撤回。最新诊断改动已构建通过；pass 计时与分块提交同时开启的设备回归仍待完成。
+
+**待完成：** 更多 GPU 与设备覆盖、地牢/章节/传送点切换、大规模战斗与技能特效、受控 30 分钟热稳定性测试，以及进一步提速。尚未验证与 iOS 的全部功能一致。
+
+**构建现状：** Android 源码及 [CMake 入口](dm/android/CMakeLists.txt)已入库；目前 APK 打包、游戏数据准备和设备回归脚本位于独立开发工作区，尚未随本仓库提供，因此**从全新克隆到 APK 构建安装的完整流程仍未交付**。下方 iOS setup 与 IPA 说明不能用于生成 Android APK。游戏文件仍需自备，仓库不提供游戏素材、着色器或存档。
+
+下方截图、60 FPS 数据、功能介绍及安装步骤，除明确标注外，均描述 **iOS 版本**。
 
 <p align="center">
   <img src="https://github.com/jhaizhou-ops/d2r-mobile/releases/download/assets/hero_zh.jpg" width="100%" alt="iPhone 上全面屏铺满的游戏画面：地狱难度的哈洛加斯，红门通往秘境">
@@ -167,7 +190,7 @@ iPhone 与 iPad 共用一个安装包。
   <img src="https://github.com/jhaizhou-ops/d2r-mobile/releases/download/assets/en_panel.jpg" width="40%" alt="英文的秘境面板">
 </p>
 
-## 怎么做到的
+## iOS 版怎么做到的
 
 ```mermaid
 flowchart LR
@@ -189,7 +212,7 @@ flowchart LR
 
 **为什么可信：** 稳定不是靠运气。测试与验证工具是项目的一部分——宿主与图形层的单元测试、对每一处改写指令的等价核对、触摸界面的脚本化走查回归、真机冒烟。从 `make -C dm/host/tests run`、`make -C dm/gfx/tests run` 与 `dm/verify/regress.sh` 开始（都在下面第 2 步准备的 Python 环境里跑；`regress.sh` 另需 `brew install llvm`）。怎么参与见 [CONTRIBUTING.zh-CN.md](CONTRIBUTING.zh-CN.md)。
 
-## 开始使用
+## 开始使用 iOS 版
 
 两条路都要先有**你自己购买的游戏的文件**：Switch 版《暗黑破坏神 II：狱火重生》本体加「术士君临」资料片，更新到 3.3.94012。本项目是按带这部资料片的版本做的，没有资料片的情况不支持、也没有验过。怎么准备见 [docs/GAME_FILES.zh-CN.md](docs/GAME_FILES.zh-CN.md)。
 
@@ -249,7 +272,7 @@ flowchart LR
 - 没验过的那几项，走通或走不通都值得告诉我们。
 - 想改代码：先跑通上面的测试入口，每次改动都要过回归闸门。
 
-**往别的平台走：** 这套做法不限于 iPhone 和 iPad。Apple 芯片的 Mac 可以直接移植过去——我们每天的回归测试就是把同一个包放在 Mac 上跑的。安卓手机用的是同一类处理器，游戏程序同样可以原生执行，这条路完全走得通：要换的只是宿主和图形层对接的那一侧。作者手边没有安卓手机，非常期待看到有人把它带到安卓上。
+**往别的平台走：** 上游项目也在 Apple 芯片的 Mac 上运行回归包。本分支已实现上方 [Android 支持](#android-支持实验性)所述的 Android 宿主和 Vulkan 后端。反馈 Android 问题时，请附设备/GPU、渲染比例、测试场景、构建版本及供电和温度条件。
 
 ## 各部分的说明
 

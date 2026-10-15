@@ -1,12 +1,35 @@
 # D2R Mobile
 
-**An open-source iOS compatibility layer for Diablo II: Resurrected with the Reign of the Warlock expansion.** It brings the Nintendo Switch release you bought, expansion included, to iPhone and iPad in full: the original game code runs natively, every control is rebuilt for touch, the frame rate holds at 60 fps, and you are in a game one second after the main menu.
+**An open-source compatibility layer for Diablo II: Resurrected with the Reign of the Warlock expansion, with iOS support and an experimental Android port.** On iPhone and iPad, it brings the Nintendo Switch release you bought, expansion included, to mobile in full: the original game code runs natively, every control is rebuilt for touch, the frame rate holds at 60 fps, and you are in a game one second after the main menu. Android progress and its separate validation limits are described below.
 
-This is not a tech demo that "sort of runs". It is a mobile version polished for daily play, from your first character all the way through the endgame.
+The iOS version is polished for daily play, from your first character all the way through the endgame. Android is still under development.
 
-Platforms: iPhone / iPad (iOS 26 and later) · Game version: Switch release with Reign of the Warlock, 3.3.94012 · English / 中文 · License: MIT · **Bring your own game files**
+Platforms: iPhone / iPad (iOS 26 and later); Android (experimental, arm64-v8a, API 29+ with Vulkan) · Game version: Switch release with Reign of the Warlock, 3.3.94012 · English / 中文 · License: MIT · **Bring your own game files**
 
 中文: [README.zh-CN.md](README.zh-CN.md)
+
+## Android support — experimental
+
+As of **2026-10-15**, this fork runs the original game on a physical Android device through a native ARM64 host and a Vulkan implementation of the game's NVN graphics interface. It reaches character selection and town, with touch controls, inventory and options, basic melee combat, an Act I camp-to-wilderness round trip, and save/exit followed by a cold restart verified on device.
+
+| Tested configuration | Observed performance |
+|---|---|
+| ROD-W09, Mali-G610 MC6, render scale 1.0, one saved Paladin at character selection | **24.08 FPS** over 1,200 frames |
+| Same device and scale, standing in town after loading | **28.56 FPS** over 900 frames |
+
+These are scene-specific observations, not a sustained or cross-device guarantee. The **30 FPS character-selection target is still unmet**. Later low-battery samples drifted down to 21–22 FPS and are not used to claim a code regression or improvement. Long thermal runs and power consumption remain unverified.
+
+Work implemented in this fork:
+
+- [Android host and app](dm/android/): native game loading, platform services, file/save access, AAudio integration, touch input and an Android activity. The native build targets Android API 29+ / arm64-v8a; this does not establish compatibility with every device meeting that minimum.
+- [Vulkan renderer](dm/gfx/nvn/nvn_vk.c): precise resource synchronization, early chunk submissions, asynchronous completion, cached writeback staging, per-mip image layouts for disjoint sampling, shader-control caching, and optional detailed profiling.
+- Validation of the committed optimization baseline includes **16 GPU fixtures** and the gameplay smoke checks above. Dynamic-uniform descriptors were tested and reverted because their FPS benefit did not reproduce. The latest profiling changes build successfully; combined pass timing and chunk submission still require device regression.
+
+**Remaining work:** broader GPU/device coverage, dungeon/act/waypoint transitions, larger fights and skill effects, controlled 30-minute thermal testing, and further performance optimization. iOS feature parity has not been established.
+
+**Build status:** Android source and its [CMake entry point](dm/android/CMakeLists.txt) are checked in. The current APK packaging, game-data preparation and device-regression scripts live in a separate development workspace and are not included here, so a fresh clone is **not yet a complete Android APK build/install workflow**. The iOS setup and IPA instructions below do not build an Android APK. You must supply your own game files; no game assets, shaders or saves are provided by this repository.
+
+The screenshots, 60 FPS claims, feature descriptions and installation instructions below describe the **iOS version**, unless explicitly labeled otherwise.
 
 <p align="center">
   <img src="https://github.com/jhaizhou-ops/d2r-mobile/releases/download/assets/hero_en.jpg" width="100%" alt="The game filling the whole edge-to-edge screen of an iPhone: Harrogath on Hell, with the red portal to the Greater Rift">
@@ -167,7 +190,7 @@ The whole game switches between English and Chinese under Options → Custom; af
   <img src="https://github.com/jhaizhou-ops/d2r-mobile/releases/download/assets/rift_panel_zh.jpg" width="40%" alt="The same Greater Rift panel in Chinese">
 </p>
 
-## How it works
+## How the iOS version works
 
 ```mermaid
 flowchart LR
@@ -189,7 +212,7 @@ flowchart LR
 
 **Why you can trust it:** the stability is not luck. The test and verification tooling is part of the project — unit tests for the host and graphics layers, an equivalence check for every rewritten instruction, scripted walkthrough regression for the touch interface, and on-device smoke tests. Start with `make -C dm/host/tests run`, `make -C dm/gfx/tests run` and `dm/verify/regress.sh` (run them inside the Python environment prepared in step 2 below; `regress.sh` also needs `brew install llvm`). How to contribute is in [CONTRIBUTING.md](CONTRIBUTING.md).
 
-## Getting started
+## Getting started on iOS
 
 Both routes start with **the files of the game you bought**: the Switch release of Diablo II: Resurrected plus the Reign of the Warlock expansion, updated to 3.3.94012. This project is built for the version with that expansion; using it without the expansion is not supported and has not been verified. How to prepare them is in [docs/GAME_FILES.md](docs/GAME_FILES.md).
 
@@ -249,7 +272,7 @@ Download our prebuilt "shell" package (`D2RMobile-shell.ipa`), which contains no
 - For the items marked not verified, tell us whether they worked or not. Either answer is valuable.
 - To change the code: get the test entry points above passing first. Every change has to pass the regression gates.
 
-**Taking it to other platforms:** this approach is not limited to iPhone and iPad. It ports directly to Apple silicon Macs — our daily regression tests run the very same package on a Mac. Android phones use the same class of processor, so the game program executes natively there as well, and the route is fully open: the only parts to replace are the sides of the host and the graphics layer that face the platform. The author has no Android phone at hand, and would love to see someone bring it to Android.
+**Taking it to other platforms:** the upstream project also runs its regression package on Apple silicon Macs. This fork implements the Android host and Vulkan backend described in [Android support](#android-support--experimental). Android device reports should include the device/GPU, render scale, tested scene, build revision and power/thermal conditions.
 
 ## Documentation by part
 
