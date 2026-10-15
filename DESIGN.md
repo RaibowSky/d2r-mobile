@@ -1,6 +1,7 @@
 ---
 version: alpha
 colors:
+  primary: "#e9d9ba"
   background: "#0d0d0f"
   text: "#e9d9ba"
   statusScrim: "#0d0d0fe6"
@@ -32,6 +33,7 @@ with mock artwork or test geometry. Existing iOS gameplay is the sibling flow.
 GameActivity is the canonical owner of shell colors. The near-black background
 keeps the unrendered Surface unobtrusive; warm parchment text follows the game's
 interface materials. Status disappears only after actual successful presentation.
+Primary shell actions reuse the same parchment value through TouchControlsView.TEXT.
 
 ## Typography
 Use Android's locale-capable native font and scaled text. Chinese is the shell's
@@ -95,6 +97,27 @@ bridges stay absent until the current game's native identities are established.
 Never copy 94012 guest addresses into this Android build.
 
 ## Do's and Don'ts
+`RendererSettingsDialog` owns the native System menu's rendering controls.
+It follows `ShellTextInputDialog`: Android AlertDialog and ScrollView own modal
+focus, Back, scrollbars, responsive bounds and accessibility. Native Switch
+controls own checked semantics and keyboard operation; the system-menu entry
+uses a native Button. Ink, rim, pressed and parchment reuse TouchControlsView
+tokens. No game camera, viewport, touch-layout or palette value changes.
+
+The menu explains clearing and writeback in player-facing terms. Changes save
+atomically to one private settings file and apply at a rendering frame boundary;
+show requested versus actually applied state, and retain the prior selection
+with an inline retry message on failure. This is a reversible setting with no
+confirmation step. Closing returns focus to the trigger. Backgrounding or an
+SDK text-entry request dismisses the menu and releases held input. The game's
+original System/pause screen remains owned by the original game.
+
+| Capability | Canonical owner | Source of truth | Allowed variants | Verification |
+| --- | --- | --- | --- | --- |
+| Rendering preferences | RendererOptionsStore / RendererOptions | attachment-mode.txt; native applied flags | two independent switches | Java model + device logs |
+| Modal and scrollbar | Android AlertDialog / ScrollView | ShellTextInputDialog sibling | renderer settings | manual device interaction |
+| Feedback | RendererSettingsDialog status TextView | nativeStatus renderer_flags | applied, pending, failed | native ack and operator check |
+
 `ShellTextInputDialog` owns all Android SDK text-entry modals. It uses native
 EditText/IME and AlertDialog focus, Back and accessibility behavior; the panel
 uses opaque ink derived from TouchControlsView.INK and shared parchment TEXT.

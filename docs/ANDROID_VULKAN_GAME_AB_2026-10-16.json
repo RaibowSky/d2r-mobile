@@ -1,0 +1,739 @@
+{
+  "date": "2026-10-16",
+  "branch": "codex/android-measured-optimizations",
+  "baseline_commit": "be0188b",
+  "artifact_root": "D:\\AndroidSwitch\\build\\android-measured-optimizations\\fullgame-ab-20261016",
+  "device": {
+    "serial": "AVAY025422000548",
+    "model": "PPG-AN00",
+    "gpu": "Adreno 830",
+    "android_api": 37,
+    "driver_name": "turnip Mesa driver (whitebelyash branch)",
+    "driver_info": "Mesa 26.2.3 (git-fbc44a3bcc)",
+    "render_path": "sysmem",
+    "render_scale": 1.0,
+    "active_display_hz": 30.000002,
+    "usb_powered": true
+  },
+  "performance_claim": {
+    "fps_improvement_demonstrated": false,
+    "hardware_bandwidth_measured": false,
+    "hardware_bandwidth_bytes": null,
+    "hardware_bandwidth_reason": [
+      "VK_KHR_performance_query unavailable",
+      "Perfetto gpu.counters unavailable",
+      "KGSL READ returned EPERM three times; GET and PUT succeeded",
+      "sysfs GPU busy/clock denied; su unavailable"
+    ],
+    "sampling_binary": "attachment-ab.apk",
+    "sampling_binary_sha256": "a837193c0852c1c2ff45bb0b8c843889f8cb23566119e93a9f952001c14c293e",
+    "sampling_native_sha256": "bf6c0c28ff5cbc516e45bddf635917f978361291241bc2082c8badba882fe128",
+    "same_process_ab_completed": true,
+    "all_thermal_windows_valid": false,
+    "excluded_phase_indexes": [
+      1
+    ],
+    "all_phases_have_same_diagnostic_logging": true,
+    "render_logic_hits_per_frame": {
+      "flags_1": {
+        "clear_loads": 21,
+        "logical_load_bytes_avoided": 59943088,
+        "discard_stores": 0,
+        "logical_store_bytes_avoided": 0
+      },
+      "flags_2": {
+        "clear_loads": 0,
+        "logical_load_bytes_avoided": 0,
+        "discard_stores": 3,
+        "logical_store_bytes_avoided": 4838400
+      },
+      "flags_3": {
+        "clear_loads": 21,
+        "logical_load_bytes_avoided": 59943088,
+        "discard_stores": 0,
+        "logical_store_bytes_avoided": 0
+      }
+    },
+    "logical_bytes_are_physical_bandwidth": false
+  },
+  "ab_analysis": {
+    "completed": true,
+    "hardware_bandwidth_measured": false,
+    "same_process": "22643",
+    "warmup_seconds": 300,
+    "scene_identity": {
+      "slot": 0,
+      "id": 1,
+      "unit": "0x7704496380",
+      "path": "0x77046bde60",
+      "x_fixed": 318734336,
+      "y_fixed": 370507776,
+      "level": 1,
+      "level_ptr": "0x7704b34720"
+    },
+    "phases": [
+      {
+        "index": 0,
+        "flags": 0,
+        "sequence": 3,
+        "ack": {
+          "pid": 22643,
+          "sequence": 3,
+          "flags": 0,
+          "after_frame": 22736,
+          "mono_ns": 517734011821665
+        },
+        "measurement_begin_mono_ns": 517794773315849,
+        "measurement_end_mono_ns": 517824773315849,
+        "same_scene_and_position": true,
+        "same_mode": true,
+        "thermal": {
+          "passed": true,
+          "battery_range_c": 0.0,
+          "skin_ranges_c": {
+            "skin": 0.25800000000000267
+          },
+          "thermal_statuses": [
+            3
+          ],
+          "battery_last_c": 45.0,
+          "observations": 23
+        },
+        "display_frames": 894,
+        "display_intervals": 893,
+        "refresh_ns": 33333333,
+        "display_fps": 29.80323566102213,
+        "display_gap_p50_ms": 33.292292,
+        "display_gap_p95_ms": 33.297448,
+        "display_gap_max_ms": 66.596406,
+        "gaps_at_least_two_refreshes": 0,
+        "drop_percent": 0.0,
+        "cpu_present_frames": 895,
+        "logical_counters_delta": {
+          "draws": 985030,
+          "clear_loads": 0,
+          "inline_clears": 0,
+          "transfer_clears": 0,
+          "discard_stores": 0,
+          "logical_load_bytes": 0,
+          "logical_store_bytes": 0
+        },
+        "hardware_bandwidth_bytes": null,
+        "battery_begin_c": 45.0,
+        "battery_end_c": 45.0,
+        "valid": true,
+        "source_run": "run-01",
+        "active_display_hz": [
+          30.000002
+        ],
+        "strict_nominal_drop_percent": 0.0,
+        "refresh_slot_drop_intervals": 7,
+        "refresh_slot_drop_percent": 0.7838745800671892,
+        "missed_refresh_slots": 7,
+        "missed_refresh_slot_percent": 0.7777777777777778,
+        "clear_loads_per_cpu_frame": 0.0,
+        "logical_load_bytes_per_cpu_frame": 0.0
+      },
+      {
+        "index": 1,
+        "flags": 3,
+        "sequence": 4,
+        "ack": {
+          "pid": 22643,
+          "sequence": 4,
+          "flags": 3,
+          "after_frame": 25466,
+          "mono_ns": 517825309400536
+        },
+        "measurement_begin_mono_ns": 517885692763002,
+        "measurement_end_mono_ns": 517915692763002,
+        "same_scene_and_position": true,
+        "same_mode": true,
+        "thermal": {
+          "passed": false,
+          "battery_range_c": 1.0,
+          "skin_ranges_c": {
+            "skin": 0.18200000000000216
+          },
+          "thermal_statuses": [
+            3
+          ],
+          "battery_last_c": 44.0,
+          "observations": 23
+        },
+        "display_frames": 896,
+        "display_intervals": 895,
+        "refresh_ns": 33333333,
+        "display_fps": 29.87185081370121,
+        "display_gap_p50_ms": 33.290417,
+        "display_gap_p95_ms": 33.294583,
+        "display_gap_max_ms": 66.584948,
+        "gaps_at_least_two_refreshes": 0,
+        "drop_percent": 0.0,
+        "cpu_present_frames": 898,
+        "logical_counters_delta": {
+          "draws": 987586,
+          "clear_loads": 18837,
+          "inline_clears": 0,
+          "transfer_clears": 7176,
+          "discard_stores": 0,
+          "logical_load_bytes": 53768949936,
+          "logical_store_bytes": 0
+        },
+        "hardware_bandwidth_bytes": null,
+        "battery_begin_c": 44.0,
+        "battery_end_c": 44.0,
+        "valid": false,
+        "source_run": "run-01",
+        "active_display_hz": [
+          30.000002
+        ],
+        "strict_nominal_drop_percent": 0.0,
+        "refresh_slot_drop_intervals": 5,
+        "refresh_slot_drop_percent": 0.5586592178770949,
+        "missed_refresh_slots": 5,
+        "missed_refresh_slot_percent": 0.5555555555555556,
+        "clear_loads_per_cpu_frame": 21.0,
+        "logical_load_bytes_per_cpu_frame": 59943088.0
+      },
+      {
+        "index": 2,
+        "flags": 0,
+        "sequence": 5,
+        "ack": {
+          "pid": 22643,
+          "sequence": 5,
+          "flags": 0,
+          "after_frame": 28231,
+          "mono_ns": 517917585466282
+        },
+        "measurement_begin_mono_ns": 517976571781405,
+        "measurement_end_mono_ns": 518006571781405,
+        "same_scene_and_position": true,
+        "same_mode": true,
+        "thermal": {
+          "passed": true,
+          "battery_range_c": 0.0,
+          "skin_ranges_c": {
+            "skin": 0.15099999999999625
+          },
+          "thermal_statuses": [
+            3
+          ],
+          "battery_last_c": 44.0,
+          "observations": 24
+        },
+        "display_frames": 896,
+        "display_intervals": 895,
+        "refresh_ns": 33333333,
+        "display_fps": 29.865753449921947,
+        "display_gap_p50_ms": 33.297187,
+        "display_gap_p95_ms": 33.300989,
+        "display_gap_max_ms": 66.602604,
+        "gaps_at_least_two_refreshes": 0,
+        "drop_percent": 0.0,
+        "cpu_present_frames": 897,
+        "logical_counters_delta": {
+          "draws": 980004,
+          "clear_loads": 0,
+          "inline_clears": 0,
+          "transfer_clears": 0,
+          "discard_stores": 0,
+          "logical_load_bytes": 0,
+          "logical_store_bytes": 0
+        },
+        "hardware_bandwidth_bytes": null,
+        "battery_begin_c": 44.0,
+        "battery_end_c": 44.0,
+        "valid": true,
+        "source_run": "run-01",
+        "active_display_hz": [
+          30.000002
+        ],
+        "strict_nominal_drop_percent": 0.0,
+        "refresh_slot_drop_intervals": 5,
+        "refresh_slot_drop_percent": 0.5586592178770949,
+        "missed_refresh_slots": 5,
+        "missed_refresh_slot_percent": 0.5555555555555556,
+        "clear_loads_per_cpu_frame": 0.0,
+        "logical_load_bytes_per_cpu_frame": 0.0
+      },
+      {
+        "index": 3,
+        "flags": 1,
+        "sequence": 6,
+        "ack": {
+          "pid": 22643,
+          "sequence": 6,
+          "flags": 1,
+          "after_frame": 30961,
+          "mono_ns": 518008908196091
+        },
+        "measurement_begin_mono_ns": 518071426903556,
+        "measurement_end_mono_ns": 518101426903556,
+        "same_scene_and_position": true,
+        "same_mode": true,
+        "thermal": {
+          "passed": true,
+          "battery_range_c": 0.0,
+          "skin_ranges_c": {
+            "skin": 0.10600000000000165
+          },
+          "thermal_statuses": [
+            3
+          ],
+          "battery_last_c": 44.0,
+          "observations": 23
+        },
+        "display_frames": 897,
+        "display_intervals": 896,
+        "refresh_ns": 33333333,
+        "display_fps": 29.903540963253565,
+        "display_gap_p50_ms": 33.292344,
+        "display_gap_p95_ms": 33.295938,
+        "display_gap_max_ms": 66.58474,
+        "gaps_at_least_two_refreshes": 0,
+        "drop_percent": 0.0,
+        "cpu_present_frames": 898,
+        "logical_counters_delta": {
+          "draws": 972516,
+          "clear_loads": 18837,
+          "inline_clears": 0,
+          "transfer_clears": 7176,
+          "discard_stores": 0,
+          "logical_load_bytes": 53768949936,
+          "logical_store_bytes": 0
+        },
+        "hardware_bandwidth_bytes": null,
+        "battery_begin_c": 44.0,
+        "battery_end_c": 44.0,
+        "valid": true,
+        "source_run": "run-01",
+        "active_display_hz": [
+          30.000002
+        ],
+        "strict_nominal_drop_percent": 0.0,
+        "refresh_slot_drop_intervals": 4,
+        "refresh_slot_drop_percent": 0.44642857142857145,
+        "missed_refresh_slots": 4,
+        "missed_refresh_slot_percent": 0.4444444444444444,
+        "clear_loads_per_cpu_frame": 21.0,
+        "logical_load_bytes_per_cpu_frame": 59943088.0
+      },
+      {
+        "index": 4,
+        "flags": 2,
+        "sequence": 7,
+        "ack": {
+          "pid": 22643,
+          "sequence": 7,
+          "flags": 2,
+          "after_frame": 33756,
+          "mono_ns": 518102159869181
+        },
+        "measurement_begin_mono_ns": 518162529863052,
+        "measurement_end_mono_ns": 518192529863052,
+        "same_scene_and_position": true,
+        "same_mode": true,
+        "thermal": {
+          "passed": true,
+          "battery_range_c": 0.0,
+          "skin_ranges_c": {
+            "skin": 0.10000000000000142
+          },
+          "thermal_statuses": [
+            3
+          ],
+          "battery_last_c": 44.0,
+          "observations": 23
+        },
+        "display_frames": 901,
+        "display_intervals": 900,
+        "refresh_ns": 33333333,
+        "display_fps": 30.0007181541911,
+        "display_gap_p50_ms": 33.295678,
+        "display_gap_p95_ms": 33.299843,
+        "display_gap_max_ms": 66.579844,
+        "gaps_at_least_two_refreshes": 0,
+        "drop_percent": 0.0,
+        "cpu_present_frames": 898,
+        "logical_counters_delta": {
+          "draws": 969181,
+          "clear_loads": 0,
+          "inline_clears": 0,
+          "transfer_clears": 0,
+          "discard_stores": 2691,
+          "logical_load_bytes": 0,
+          "logical_store_bytes": 4340044800
+        },
+        "hardware_bandwidth_bytes": null,
+        "battery_begin_c": 44.0,
+        "battery_end_c": 44.0,
+        "valid": true,
+        "source_run": "run-01",
+        "active_display_hz": [
+          30.000002
+        ],
+        "strict_nominal_drop_percent": 0.0,
+        "refresh_slot_drop_intervals": 1,
+        "refresh_slot_drop_percent": 0.1111111111111111,
+        "missed_refresh_slots": 1,
+        "missed_refresh_slot_percent": 0.11098779134295228,
+        "clear_loads_per_cpu_frame": 0.0,
+        "logical_load_bytes_per_cpu_frame": 0.0
+      },
+      {
+        "index": 5,
+        "flags": 3,
+        "sequence": 10,
+        "ack": {
+          "pid": 22643,
+          "sequence": 10,
+          "flags": 3,
+          "after_frame": 45583,
+          "mono_ns": 518499729694446
+        },
+        "measurement_begin_mono_ns": 518560960272275,
+        "measurement_end_mono_ns": 518590960272275,
+        "same_scene_and_position": true,
+        "same_mode": true,
+        "thermal": {
+          "passed": true,
+          "battery_range_c": 0.0,
+          "skin_ranges_c": {
+            "skin": 0.1180000000000021
+          },
+          "thermal_statuses": [
+            3
+          ],
+          "battery_last_c": 44.0,
+          "observations": 24
+        },
+        "display_frames": 893,
+        "display_intervals": 892,
+        "refresh_ns": 33333333,
+        "display_fps": 29.769002863153894,
+        "display_gap_p50_ms": 33.293125,
+        "display_gap_p95_ms": 33.299896,
+        "display_gap_max_ms": 66.596406,
+        "gaps_at_least_two_refreshes": 0,
+        "drop_percent": 0.0,
+        "cpu_present_frames": 892,
+        "logical_counters_delta": {
+          "draws": 993633,
+          "clear_loads": 18711,
+          "inline_clears": 0,
+          "transfer_clears": 7128,
+          "discard_stores": 0,
+          "logical_load_bytes": 53409291408,
+          "logical_store_bytes": 0
+        },
+        "hardware_bandwidth_bytes": null,
+        "battery_begin_c": 44.0,
+        "battery_end_c": 44.0,
+        "valid": true,
+        "source_run": "run-02-final-repeat",
+        "active_display_hz": [
+          30.000002
+        ],
+        "strict_nominal_drop_percent": 0.0,
+        "refresh_slot_drop_intervals": 8,
+        "refresh_slot_drop_percent": 0.8968609865470852,
+        "missed_refresh_slots": 8,
+        "missed_refresh_slot_percent": 0.8888888888888888,
+        "clear_loads_per_cpu_frame": 21.0,
+        "logical_load_bytes_per_cpu_frame": 59943088.0
+      }
+    ],
+    "interrupted_capture_error": "No actual display timestamps",
+    "drop_rule": "Round each actual-display gap to nearest number of active-display refresh slots; count gaps spanning >=2 slots. Preserve strict nominal >=2T metric separately.",
+    "source_sha256": "822be4ab8ee839ca04077b3b192f2edfa59df98f241b4bd63162d3afa0082c97",
+    "raw_sha256": {
+      "D:\\AndroidSwitch\\build\\android-measured-optimizations\\fullgame-ab-20261016\\run-01\\display-modes.jsonl": "4e43d802826020e99614f739850f185e3e4f5f2523e2cfbc88b55ea95885fc36",
+      "D:\\AndroidSwitch\\build\\android-measured-optimizations\\fullgame-ab-20261016\\run-01\\display-samples.jsonl": "9e357d5eaf8572da326012c5633651a9e52566e5cd9b438184e569231ac99fb7",
+      "D:\\AndroidSwitch\\build\\android-measured-optimizations\\fullgame-ab-20261016\\run-01\\initial-startup.log": "d15b937ded9c6dfdb13e63f0f0a5aa8cbf08ba614a17f90569c88b9e64e2579e",
+      "D:\\AndroidSwitch\\build\\android-measured-optimizations\\fullgame-ab-20261016\\run-01\\interval.log": "7cd18dbc8f18b88ab4739fb37e3183b4f87d0329db74139187dc48ab006fae72",
+      "D:\\AndroidSwitch\\build\\android-measured-optimizations\\fullgame-ab-20261016\\run-01\\layers.txt": "191af5d24d64b4948f8bb5d24ada634f26e31a6a776040643cc14055cb8ba9e9",
+      "D:\\AndroidSwitch\\build\\android-measured-optimizations\\fullgame-ab-20261016\\run-01\\mode-2.txt": "6b41156b05c37763a38475f3438bc3aa533e1d406948c4b1f18a733c2bc6f618",
+      "D:\\AndroidSwitch\\build\\android-measured-optimizations\\fullgame-ab-20261016\\run-01\\mode-3.txt": "d1a6d53e118aae7179fa5db01929845223c602958048ea41f770000bac9f7047",
+      "D:\\AndroidSwitch\\build\\android-measured-optimizations\\fullgame-ab-20261016\\run-01\\mode-4.txt": "830736dd09d5b5cd659fcd944f0fd83e384819cdbad7d1a7c6d5eef02ff70d95",
+      "D:\\AndroidSwitch\\build\\android-measured-optimizations\\fullgame-ab-20261016\\run-01\\mode-5.txt": "c6d3e4225802e10716038e257a171426ed64437a32290d10e0f6965f05a7467c",
+      "D:\\AndroidSwitch\\build\\android-measured-optimizations\\fullgame-ab-20261016\\run-01\\mode-6.txt": "f1dfd556f9fe4fd0444d1ea8c23c92aa530750fc22aa9c2947fb96fa27ee821e",
+      "D:\\AndroidSwitch\\build\\android-measured-optimizations\\fullgame-ab-20261016\\run-01\\mode-7.txt": "9d404e4776a3d473c84bdd1e8efeefccb2db15371bdae23791533d012b5d2a3b",
+      "D:\\AndroidSwitch\\build\\android-measured-optimizations\\fullgame-ab-20261016\\run-01\\mode-8.txt": "b75f5599bdc4e2d26a243d11be03120fe97cfafb2099ce11ed7ce153df640b6b",
+      "D:\\AndroidSwitch\\build\\android-measured-optimizations\\fullgame-ab-20261016\\run-01\\result.json": "6552fda0b2e37ab66a12b13ca9c12707ef95c128ee5e45d5cb4241d2b0f0ae9c",
+      "D:\\AndroidSwitch\\build\\android-measured-optimizations\\fullgame-ab-20261016\\run-01\\state-samples.jsonl": "3a6f947825be4f49d00ac0813dbb12aa96bb0c2c29a11f83ddd7e3830a796576",
+      "D:\\AndroidSwitch\\build\\android-measured-optimizations\\fullgame-ab-20261016\\run-02-final-repeat\\display-samples.jsonl": "15fc1379c78fdb77298b5500a32df757efaee1d6cb88d101b762866046b4fdcb",
+      "D:\\AndroidSwitch\\build\\android-measured-optimizations\\fullgame-ab-20261016\\run-02-final-repeat\\initial-startup.log": "ec8c2fa5857741f2caa3a428b07afdd6a7cef10c09d4968fa423188356b15967",
+      "D:\\AndroidSwitch\\build\\android-measured-optimizations\\fullgame-ab-20261016\\run-02-final-repeat\\interval.log": "458e0130b63c23014c2fdbddef349d628eee9d0d96a978f6cb865f1ed0cba7b0",
+      "D:\\AndroidSwitch\\build\\android-measured-optimizations\\fullgame-ab-20261016\\run-02-final-repeat\\layers.txt": "93e92678b8ac01f1dac5f00d745ff705e420e3f3309bb9e8218d69f91fd50d59",
+      "D:\\AndroidSwitch\\build\\android-measured-optimizations\\fullgame-ab-20261016\\run-02-final-repeat\\mode-10.txt": "56a9538823d8971a02ef2460f65da701ad072886a053c92ee0c6a7e7a36a2679",
+      "D:\\AndroidSwitch\\build\\android-measured-optimizations\\fullgame-ab-20261016\\run-02-final-repeat\\mode-9.txt": "2d21c49023ef90df793822213cd575612c44000f6b767741a7b79261cc8554a0",
+      "D:\\AndroidSwitch\\build\\android-measured-optimizations\\fullgame-ab-20261016\\run-02-final-repeat\\result.json": "ec7b99269ab6104de5b057c4b32a58a8f254f180791e809feaefc6cbd0c644a5",
+      "D:\\AndroidSwitch\\build\\android-measured-optimizations\\fullgame-ab-20261016\\run-02-final-repeat\\state-samples.jsonl": "8e71d4e5ac1c8a296431e0d2dcd579bbb03d3678568b7cee0dfaae1e4b715b66"
+    },
+    "primary_drop_metric": "refresh_slot_drop_percent"
+  },
+  "operator_visual_observation": {
+    "recorded_at_utc": "2026-10-15T19:44:18.639840+00:00",
+    "source": "direct user reply in this chat",
+    "observation": "没有发现画面异常",
+    "prompt_scope": "全关、全开、再次全关，以及仅清屏合并阶段",
+    "assistant_screen_capture_after_operator_takeover": false
+  },
+  "menu": {
+    "apk": {
+      "passed": true,
+      "apk": "D:\\AndroidSwitch\\build\\android-measured-optimizations\\fullgame-ab-20261016\\menu-apk-crlf-fix\\d2r-attachment-menu.apk",
+      "apk_sha256": "a60f5429159bd3875d58da3a9d22ab8c685c14a1908a0cbfa69d2f7ed3793033",
+      "native_sha256": "b25c73026d027c57321af8966b123236dafd9ac240ecded0227476f69cb409d1",
+      "base_apk_sha256": "a837193c0852c1c2ff45bb0b8c843889f8cb23566119e93a9f952001c14c293e",
+      "java_source_sha256": {
+        "dm\\android\\src\\org\\d2r\\binaryprobe\\GameActivity.java": "475611bc7567ba305dedb239dfd41be97338b62bd3d1353f72d9a85d06f681ba",
+        "dm\\android\\src\\org\\d2r\\binaryprobe\\GameDisplayMetrics.java": "62064ce52f018f7b82471499c1e17d0bac8cf3e3443c9cf204469784c10e0006",
+        "dm\\android\\src\\org\\d2r\\binaryprobe\\GameViewport.java": "b54b8abb1814badf97c389132bfe1eb2ae629007e270dca3cb85806fe8d92307",
+        "dm\\android\\src\\org\\d2r\\binaryprobe\\RendererOptions.java": "4ee847d347eece0119557493f375570884bb7b8263d7148f4d0994d217a01c0e",
+        "dm\\android\\src\\org\\d2r\\binaryprobe\\RendererOptionsStore.java": "4d41bdf691d51f59eb9c218ea887f7bd28b774038f8bf6ad8ccbe65c58adeb55",
+        "dm\\android\\src\\org\\d2r\\binaryprobe\\RendererSettingsDialog.java": "3a980ad286f782e31b6a5c05bc93bacf6b5bef2cc22af7eba036843910298ca0",
+        "dm\\android\\src\\org\\d2r\\binaryprobe\\ShellTextInputDialog.java": "25615c796815fd6c1a7809b11c6364b93a387bc59c31eb39da69e46725a26749",
+        "dm\\android\\src\\org\\d2r\\binaryprobe\\TouchControlsView.java": "d915b06c69c530001735fa7958824bd09fbb514ca50ea577f4f71cd099ac82a0"
+      },
+      "signature_verified": true,
+      "zip_alignment_16k_verified": true
+    },
+    "install": {
+      "installed": true,
+      "install_output": "Performing Incremental Install\r\nPerforming Streamed Install\r\nSuccess\r\n",
+      "restart_output": "Starting: Intent { cmp=org.d2r.binaryprobe/.GameActivity }\r\nStatus: ok\r\nLaunchState: COLD\r\nActivity: org.d2r.binaryprobe/.GameActivity\r\nTotalTime: 398\r\nWaitTime: 404\r\nComplete\r\n",
+      "uid": "uid=10490(u0_a490) gid=10490(u0_a490) groups=10490(u0_a490),1004(input),1007(log),1011(adb),1015(sdcard_rw),1028(sdcard_r),1078(ext_data_rw),1079(ext_obb_rw),3001(net_bt_admin),3002(net_bt),3003(inet),3006(net_bw_stats),3009(readproc),3011(uhid),3012(readtracefs),50490(all_a490) context=u:r:runas_app:s0:c234,c257,c512,c768",
+      "uid_preserved": true,
+      "mode_file_preserved": true,
+      "mode_file_hex": "313020330d0a",
+      "mode_file_text": "10 3\r\n",
+      "apk": "D:\\AndroidSwitch\\build\\android-measured-optimizations\\fullgame-ab-20261016\\menu-apk-crlf-fix\\d2r-attachment-menu.apk"
+    },
+    "device_verification": {
+      "recorded_at_utc": "2026-10-15T19:57:09.726748+00:00",
+      "serial": "AVAY025422000548",
+      "pid": 21071,
+      "mode_acknowledgements": [
+        {
+          "request": {
+            "pid": 21071,
+            "sequence": 10,
+            "flags": 3,
+            "after_frame": 0,
+            "mono_ns": 518994305398372
+          },
+          "first_matching_frame": {
+            "pid": 21071,
+            "frame": 1,
+            "sequence": 10,
+            "flags": 3,
+            "mono_ns": 518997224537745,
+            "width": 2247,
+            "height": 1264,
+            "draws": 91,
+            "clear_loads": 14,
+            "inline_clears": 0,
+            "transfer_clears": 17,
+            "discard_stores": 0,
+            "logical_load_bytes": 23346800,
+            "logical_store_bytes": 0
+          },
+          "matching_frames": 368
+        },
+        {
+          "request": {
+            "pid": 21071,
+            "sequence": 1474832167903501,
+            "flags": 2,
+            "after_frame": 368,
+            "mono_ns": 519006997510346
+          },
+          "first_matching_frame": {
+            "pid": 21071,
+            "frame": 369,
+            "sequence": 1474832167903501,
+            "flags": 2,
+            "mono_ns": 519007161101492,
+            "width": 2247,
+            "height": 1264,
+            "draws": 21974,
+            "clear_loads": 764,
+            "inline_clears": 0,
+            "transfer_clears": 762,
+            "discard_stores": 4,
+            "logical_load_bytes": 1759552000,
+            "logical_store_bytes": 6758400
+          },
+          "matching_frames": 16
+        },
+        {
+          "request": {
+            "pid": 21071,
+            "sequence": 1474833460345375,
+            "flags": 0,
+            "after_frame": 384,
+            "mono_ns": 519007651267325
+          },
+          "first_matching_frame": {
+            "pid": 21071,
+            "frame": 385,
+            "sequence": 1474833460345375,
+            "flags": 0,
+            "mono_ns": 519007684420398,
+            "width": 2247,
+            "height": 1264,
+            "draws": 35990,
+            "clear_loads": 764,
+            "inline_clears": 0,
+            "transfer_clears": 762,
+            "discard_stores": 64,
+            "logical_load_bytes": 1759552000,
+            "logical_store_bytes": 108134400
+          },
+          "matching_frames": 192
+        },
+        {
+          "request": {
+            "pid": 21071,
+            "sequence": 1474839913831102,
+            "flags": 1,
+            "after_frame": 576,
+            "mono_ns": 519014178639301
+          },
+          "first_matching_frame": {
+            "pid": 21071,
+            "frame": 577,
+            "sequence": 1474839913831102,
+            "flags": 1,
+            "mono_ns": 519014204171333,
+            "width": 2247,
+            "height": 1264,
+            "draws": 222299,
+            "clear_loads": 783,
+            "inline_clears": 0,
+            "transfer_clears": 773,
+            "discard_stores": 64,
+            "logical_load_bytes": 1818049200,
+            "logical_store_bytes": 108134400
+          },
+          "matching_frames": 205
+        },
+        {
+          "request": {
+            "pid": 21071,
+            "sequence": 1474845357865996,
+            "flags": 3,
+            "after_frame": 781,
+            "mono_ns": 519019527182893
+          },
+          "first_matching_frame": {
+            "pid": 21071,
+            "frame": 782,
+            "sequence": 1474845357865996,
+            "flags": 3,
+            "mono_ns": 519019555887685,
+            "width": 2247,
+            "height": 1264,
+            "draws": 422233,
+            "clear_loads": 4678,
+            "inline_clears": 0,
+            "transfer_clears": 3028,
+            "discard_stores": 64,
+            "logical_load_bytes": 13809975200,
+            "logical_store_bytes": 108134400
+          },
+          "matching_frames": 1801
+        },
+        {
+          "request": {
+            "pid": 21071,
+            "sequence": 1474897157462955,
+            "flags": 1,
+            "after_frame": 2582,
+            "mono_ns": 519071381287821
+          },
+          "first_matching_frame": {
+            "pid": 21071,
+            "frame": 2583,
+            "sequence": 1474897157462955,
+            "flags": 1,
+            "mono_ns": 519071398831832,
+            "width": 2247,
+            "height": 1264,
+            "draws": 2084907,
+            "clear_loads": 37609,
+            "inline_clears": 0,
+            "transfer_clears": 16461,
+            "discard_stores": 64,
+            "logical_load_bytes": 108469109424,
+            "logical_store_bytes": 108134400
+          },
+          "matching_frames": 6272
+        }
+      ],
+      "operator_report": "已生效",
+      "operator_source": "direct user reply in this chat",
+      "final_mode_text": "1474897157462955 1\n",
+      "final_mode_hex": "3134373438393731353734363239353520310a",
+      "fatal_renderer_messages": [],
+      "screenshots_taken": false,
+      "input_sent": false,
+      "settings_changed_by_assistant": false,
+      "current_startup_sha256": "1044410e28af6937bf9f0578938580cc6febee4a3c1420334ed122301168da61",
+      "current_mode_sha256": "51707cc32ea1f57eeb7d138ab84f137e25b6df45d14e64fd0fb25e027261dd4c"
+    },
+    "fix": {
+      "bug": "CRLF settings from Windows A/B runner rejected by LF-only parser, disabling switches",
+      "accepted_endings": [
+        "LF",
+        "CRLF",
+        "no trailing newline"
+      ],
+      "host_java_checks": 27,
+      "passed": true
+    },
+    "full_thermal_ab_repeated_on_menu_binary": false
+  },
+  "build_verification": {
+    "native_cmake_build_exit_code": 0,
+    "final_native_build_result": "ninja: no work to do; prior build produced menu native",
+    "java_dex_compile_passed": true,
+    "signature_verified": true,
+    "alignment_16k_verified": true,
+    "ui_strict_static_audit_passed": true,
+    "design_lint_passed": true,
+    "runtime_visual_check_source": "user; no assistant screenshots after operator takeover"
+  },
+  "source_sha256": {
+    "dm/gfx/nvn/nvn_vk.c": "7c6059c55909a027808dab52db7a9b84050f87868d05c13fb715fcd2ab3506bc",
+    "dm/android/app_jni.c": "2dfafbfdd8f15b70f2d592a082b5d153d963e3c37a35f7fe29c8309dd4e2cfe2",
+    "dm/android/src/org/d2r/binaryprobe/GameActivity.java": "475611bc7567ba305dedb239dfd41be97338b62bd3d1353f72d9a85d06f681ba",
+    "dm/android/src/org/d2r/binaryprobe/RendererOptions.java": "4ee847d347eece0119557493f375570884bb7b8263d7148f4d0994d217a01c0e",
+    "dm/android/src/org/d2r/binaryprobe/RendererOptionsStore.java": "4d41bdf691d51f59eb9c218ea887f7bd28b774038f8bf6ad8ccbe65c58adeb55",
+    "dm/android/src/org/d2r/binaryprobe/RendererSettingsDialog.java": "3a980ad286f782e31b6a5c05bc93bacf6b5bef2cc22af7eba036843910298ca0",
+    "dm/android/tests/RendererOptionsTest.java": "185057a38a24e92c4065ca0261856f925c587404cccd57137ff830f0c1ba2f4f",
+    "dm/android/tests/capture_attachment_game.py": "7e93a86d64ccf794de3e4dba40f094fabc87547bb66dfb53ff25b2db2c485596",
+    "dm/android/tests/summarize_attachment_game.py": "822be4ab8ee839ca04077b3b192f2edfa59df98f241b4bd63162d3afa0082c97",
+    "dm/android/tests/scene_91738_probe.c": "1711caa5fed8f70c67009a61dfe3ac9c4fe59a1d305cf56307c76fcf0729b23e",
+    "dm/android/tests/package_worktree_apk.py": "7d1015ee9abd489721f55b28b825f474d8ec094116e12a910a0307ff947352dc"
+  },
+  "artifact_sha256": {
+    "run-01/analysis.json": "d02601dc88e4c972436f880372760912b465022662163b336cc575518b77371f",
+    "apk-build.json": "eac4fd431ac978761557c0b0c5c453421d1f98a7754193c1f18a0566a4feefc2",
+    "kgsl-access.txt": "7d75e742d739021488006ae4d111fc3a83aeef2275b6075adb26fc1e8433fa72",
+    "gpu-sysfs-access.txt": "ffade2345368947cb9ccc57377c7aaf8600dfc5c4091bc08a3310aa94811a464",
+    "perfetto-query.txt": "0d574881739044c9219f4046191563d0a9c2f437a6762e7c6619d261f1b84466",
+    "root-availability.txt": "fba6d69482fa0b55d7b5f75cee0fa6a4dc4d447cd62cecc8a2b43f8818cf59ba",
+    "operator-visual-observation.json": "5e453608d63d67f2386d23e0ff5815920568ae2122b45b67d37ac2a9ca208f80",
+    "menu-apk-crlf-fix/result.json": "25907f78a8ee36d5d390f3a35ef4456ee163ba32599367c4dc3c6528465452be",
+    "menu-apk-crlf-fix/install-result.json": "c2f5a1cc7f36028e55e26fe01a727f6418149f1c81227a7463af7eff42b4a776",
+    "menu-apk-crlf-fix/device-verification.json": "a0cf335ce5cd2e7f620d74c1e95ded43e3dee1738891bc41eb1dbd77918e1f26",
+    "native-build-final.log": "71aa391ec7d7e291b419a7f40fba91919e14ac2394ab4e8b66ed126e267d70f6",
+    "renderer-options-test.log": "b659881f0ee5ea98fa990884359e78c68ca6f0acd562a49dae5766bd5cf63fd8",
+    "premium-audit.json": "590f6de19c36158d099f8fcc12bc4fb03af0ee8b185962b57b41b010c521c851",
+    "design-lint.log": "05a4ff206a5f3a6c2172ab9cce8cbbb1cdc4405f764776536984fd6f560ae3a2"
+  }
+}

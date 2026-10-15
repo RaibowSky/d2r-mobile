@@ -25,6 +25,7 @@ extern int dm_android_diagnostics_flush(void);
 extern void dm_vk_set_shader_root(const char *);
 extern void dm_vk_set_window(void *);
 extern void dm_vk_set_display_hz(int);
+extern int dm_vk_attachment_applied_flags(void);
 extern void dm_gfx_suspend(int);
 extern void dm_audio_suspend(int);
 extern void dm_android_real_resource_probe(const char *);
@@ -68,9 +69,9 @@ static int configure_render_scale(void) {
     return setenv("DM_3D_SCALE",value,1)?errno:0;
 }
 static void status_text(char *text,size_t capacity) {
-    snprintf(text,capacity,"{\"phase\":\"%s\",\"sdk_ready\":%s,\"nnMain_entered\":%s,\"presented_frames\":%llu,\"returned\":%s}",phase,
+    snprintf(text,capacity,"{\"phase\":\"%s\",\"sdk_ready\":%s,\"nnMain_entered\":%s,\"presented_frames\":%llu,\"returned\":%s,\"renderer_flags\":%d}",phase,
         atomic_load(&sdk_ready)?"true":"false",atomic_load(&main_entered)?"true":"false",
-        (unsigned long long)atomic_load(&presented_frames),atomic_load(&returned)?"true":"false");
+        (unsigned long long)atomic_load(&presented_frames),atomic_load(&returned)?"true":"false",dm_vk_attachment_applied_flags());
 }
 static void persist_status(void) {
     if (!report_file[0]) return;
@@ -314,6 +315,16 @@ JNIEXPORT jint JNICALL Java_org_d2r_binaryprobe_GameActivity_nativeConfigure(JNI
     char logs[PATH_MAX], log[PATH_MAX], shaders[PATH_MAX];
     path(logs,sizeof logs,port_root,"diagnostics");
     setenv("DM_FRAME_DIR",logs,1);
+    path(driver_option,sizeof driver_option,logs,"attachment-mode.txt");
+    setenv("DM_VK_ATTACHMENT_CONTROL",driver_option,1);
+    /* Opt-in live A/B control. The file is sampled by the replay thread only
+     * at frame boundaries; it does not restart or alter the game session. */
+    unsetenv("DM_VK_AB_CONTROL");
+    path(driver_option,sizeof driver_option,logs,"attachment-ab");
+    if(access(driver_option,F_OK)==0){
+        path(driver_option,sizeof driver_option,logs,"attachment-mode.txt");
+        setenv("DM_VK_AB_CONTROL",driver_option,1);
+    }
     if (dm_android_fs_ensure_directory(logs)) return errno?errno:EIO;
     path(log,sizeof log,logs,"game-startup.log");
     char status_path[PATH_MAX]; path(status_path,sizeof status_path,logs,"status.json");

@@ -16,6 +16,8 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+import android.widget.Button;
+import android.content.res.ColorStateList;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -48,6 +50,8 @@ public final class GameActivity extends Activity implements SurfaceHolder.Callba
     private TextView status,fps;
     private final GameDisplayMetrics.FpsSampler fpsSampler=new GameDisplayMetrics.FpsSampler();
     private double displayedFps=Double.NaN;
+    private RendererSettingsDialog rendererSettings;
+    private int appliedRendererFlags=RendererOptions.DEFAULT_FLAGS;
     private TouchControlsView touchControls;
     private final java.util.ArrayList<View> menuControls=new java.util.ArrayList<>();
     private boolean prepared, configured, surfaceReady, launched, resumed, failed;
@@ -93,6 +97,14 @@ public final class GameActivity extends Activity implements SurfaceHolder.Callba
             touchControls.setActive(combat);for(View control:menuControls)control.setVisibility(combat?View.GONE:View.VISIBLE);
             mode.setText(combat?"菜单操控":"战斗操控");mode.setContentDescription(combat?"切换到菜单操控":"切换到战斗触摸操控");});
         viewport.addView(mode,modeParams);
+        Button system=new Button(this);system.setText("系统");system.setContentDescription("系统菜单");system.setTextColor(TouchControlsView.TEXT);system.setTextSize(16);
+        system.setBackgroundTintList(ColorStateList.valueOf(TouchControlsView.INK));
+        FrameLayout.LayoutParams systemParams=new FrameLayout.LayoutParams(dp(80),dp(48),Gravity.LEFT|Gravity.TOP);
+        systemParams.leftMargin=dp(134);systemParams.topMargin=dp(18);
+        system.setOnClickListener(v->{if(!configured||failed||rendererSettings!=null||keyboardDialog!=null)return;
+            actionButtons=0;if(inputReady)nativeActions(0,0,0,0,0);touchControls.cancel();
+            rendererSettings=RendererSettingsDialog.show(this,appliedRendererFlags,system,()->rendererSettings=null);});
+        viewport.addView(system,systemParams);
         fps=new TextView(this);fps.setText("FPS —");fps.setTextColor(TouchControlsView.TEXT);
         fps.setTextSize(12);fps.setTypeface(Typeface.MONOSPACE);fps.setGravity(Gravity.CENTER);
         fps.setMinWidth(dp(84));fps.setPadding(dp(8),dp(4),dp(8),dp(4));fps.setBackgroundColor(TouchControlsView.INK);
@@ -180,10 +192,13 @@ public final class GameActivity extends Activity implements SurfaceHolder.Callba
             }
         });
     }
-    private void fail(String title,Exception error){nativeKeyboardReady(false);if(keyboardDialog!=null){keyboardDialog.dismiss();keyboardDialog=null;}failed=true;status.setVisibility(View.VISIBLE);status.setText(title+"\n"+error.getMessage());}
+    private void closeRendererSettings(){if(rendererSettings!=null){rendererSettings.dismiss();rendererSettings=null;}}
+    private void fail(String title,Exception error){closeRendererSettings();nativeKeyboardReady(false);if(keyboardDialog!=null){keyboardDialog.dismiss();keyboardDialog=null;}failed=true;status.setVisibility(View.VISIBLE);status.setText(title+"\n"+error.getMessage());}
     private final Runnable poll=new Runnable(){public void run(){
         if(!launched||failed)return;
         try{String raw=nativeStatus();JSONObject s=new JSONObject(raw);
+            appliedRendererFlags=s.optInt("renderer_flags",RendererOptions.DEFAULT_FLAGS);
+            if(rendererSettings!=null)rendererSettings.updateApplied(appliedRendererFlags);
             long frame=s.getLong("presented_frames");
             if(frame>0)status.setVisibility(View.GONE);else status.setText(s.getString("phase"));
             if(resumed){double current=fpsSampler.sample(frame,SystemClock.elapsedRealtime());
@@ -192,14 +207,14 @@ public final class GameActivity extends Activity implements SurfaceHolder.Callba
                     displayedFps=current;
                 }}
             String request=nativeKeyboardRequest();if(request!=null&&resumed&&!destroyed){JSONObject k=new JSONObject(request);long id=k.getLong("id");
-                if(keyboardDialog==null||keyboardId!=id){if(keyboardDialog!=null)keyboardDialog.dismiss();keyboardId=id;actionButtons=0;nativeActions(0,0,0,0,0);touchControls.cancel();
+                if(keyboardDialog==null||keyboardId!=id){closeRendererSettings();if(keyboardDialog!=null)keyboardDialog.dismiss();keyboardId=id;actionButtons=0;nativeActions(0,0,0,0,0);touchControls.cancel();
                     keyboardDialog=ShellTextInputDialog.show(GameActivity.this,k.getString("title"),k.getString("subtitle"),k.getString("hint"),k.getString("initial"),k.getInt("min"),k.getInt("max"),(ok,text)->{nativeKeyboardResult(id,ok,text);keyboardDialog=null;});}}
         }catch(Exception e){fail("无法读取游戏状态",e);}ui.postDelayed(this,500);
     }};
     @Override public void onResume(){super.onResume();resumed=true;fpsSampler.reset();nativeKeyboardReady(true);configureAndStart();}
-    @Override public void onPause(){nativeKeyboardReady(false);if(keyboardDialog!=null){keyboardDialog.dismiss();keyboardDialog=null;}resumed=false;fpsSampler.reset();displayedFps=Double.NaN;if(fps!=null)fps.setText("FPS —");inputReady=false;actionButtons=0;if(touchControls!=null)touchControls.cancel();if(configured)nativeActions(0,0,0,0,0);if(configured&&surfaceReady)publishSurface();super.onPause();}
+    @Override public void onPause(){closeRendererSettings();nativeKeyboardReady(false);if(keyboardDialog!=null){keyboardDialog.dismiss();keyboardDialog=null;}resumed=false;fpsSampler.reset();displayedFps=Double.NaN;if(fps!=null)fps.setText("FPS —");inputReady=false;actionButtons=0;if(touchControls!=null)touchControls.cancel();if(configured)nativeActions(0,0,0,0,0);if(configured&&surfaceReady)publishSurface();super.onPause();}
     @Override public void surfaceCreated(SurfaceHolder holder){if(!destroyed)surfaceReady=true;}
     @Override public void surfaceChanged(SurfaceHolder holder,int format,int w,int h){if(destroyed)return;width=w;height=h;surfaceReady=true;configureAndStart();}
     @Override public void surfaceDestroyed(SurfaceHolder holder){if(destroyed)return;surfaceReady=false;if(configured)publishSurface();}
-    @Override public void onDestroy(){nativeKeyboardReady(false);if(keyboardDialog!=null){keyboardDialog.dismiss();keyboardDialog=null;}destroyed=true;inputReady=false;surfaceReady=false;if(configured)publishSurface();ui.removeCallbacks(poll);surfaceThread.quitSafely();super.onDestroy();}
+    @Override public void onDestroy(){closeRendererSettings();nativeKeyboardReady(false);if(keyboardDialog!=null){keyboardDialog.dismiss();keyboardDialog=null;}destroyed=true;inputReady=false;surfaceReady=false;if(configured)publishSurface();ui.removeCallbacks(poll);surfaceThread.quitSafely();super.onDestroy();}
 }

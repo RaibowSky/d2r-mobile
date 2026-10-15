@@ -431,8 +431,12 @@ static void backend_init(void) {
     PFN_vkEnumerateDeviceExtensionProperties enumerate_extensions=(PFN_vkEnumerateDeviceExtensionProperties)dm_vk_get(G.instance,"vkEnumerateDeviceExtensionProperties");
     uint32_t extension_count=0;CHECK(enumerate_extensions(G.physical,NULL,&extension_count,NULL));
     VkExtensionProperties *extension_properties=calloc(extension_count,sizeof(*extension_properties));if(!extension_properties)die("device extension allocation",extension_count);
-    CHECK(enumerate_extensions(G.physical,NULL,&extension_count,extension_properties));int has_feedback=0;
-    for(uint32_t i=0;i<extension_count;i++)has_feedback|=!strcmp(extension_properties[i].extensionName,de[1]);free(extension_properties);
+    CHECK(enumerate_extensions(G.physical,NULL,&extension_count,extension_properties));int has_feedback=0,has_performance_query=0;
+    for(uint32_t i=0;i<extension_count;i++){
+        has_feedback|=!strcmp(extension_properties[i].extensionName,de[1]);
+        has_performance_query|=!strcmp(extension_properties[i].extensionName,"VK_KHR_performance_query");
+    }free(extension_properties);
+    if(getenv("DM_VK_AB_CONTROL"))fprintf(stderr,"[nvn-vulkan] ATTACHMENT_AB_CAPS performance_query=%d timing=cpu_present_only bandwidth=not_measured\n",has_performance_query);
     VkPhysicalDeviceAttachmentFeedbackLoopLayoutFeaturesEXT feedback={.sType=VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ATTACHMENT_FEEDBACK_LOOP_LAYOUT_FEATURES_EXT};
     VkPhysicalDeviceShaderDrawParametersFeatures draw_parameters={.sType=VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_DRAW_PARAMETERS_FEATURES,.pNext=has_feedback?&feedback:NULL};
     VkPhysicalDeviceFeatures2 features={.sType=VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,.pNext=&draw_parameters};
@@ -642,10 +646,39 @@ static void occlusion_end(void) {
 static void chunk_ts_write(int end);
 static void pending_clears_flush(void);
 static _Atomic int attachment_override=-1;
+static _Atomic int attachment_applied=3;
+int dm_vk_attachment_applied_flags(void) {return atomic_load(&attachment_applied);}
 /* Diagnostic A/B control, latched at submit begin. Call between QueueFinish
  * boundaries to compare the same workload within one process. */
 void dm_vk_attachment_config(int flags) { atomic_store(&attachment_override,flags<0?-1:flags&3); }
 void dm_vk_attachment_stats(NvnAttachmentStats *out) {pthread_mutex_lock(&G.lock);*out=G.attachment_stats;pthread_mutex_unlock(&G.lock);}
+/* Diagnostic only: requests are "monotonic_sequence flags" (flags 0..3).
+ * Publish the override after a present; the next submission latches it.
+ * These timestamps describe CPU present calls, not display/scanout times. */
+static uint64_t attachment_ab_sequence;
+static void attachment_ab_poll(uint64_t completed_frame) {
+    const char *path=getenv("DM_VK_ATTACHMENT_CONTROL");if(!path)path=getenv("DM_VK_AB_CONTROL");if(!path)return;
+    static uint64_t last_poll;uint64_t now=dm_android_nvn_clock_ns();if(now-last_poll<100000000)return;last_poll=now;
+    FILE *f=fopen(path,"r");if(!f)return;
+    char text[96]={0},extra;size_t size=fread(text,1,sizeof text-1,f);int tail=fgetc(f);fclose(f);
+    unsigned long long sequence=0;int flags=-1;
+    if(!size||tail!=EOF||sscanf(text,"%llu %d %c",&sequence,&flags,&extra)!=2||
+       sequence<=attachment_ab_sequence||flags<0||flags>3)return;
+    attachment_ab_sequence=sequence;dm_vk_attachment_config(flags);
+    fprintf(stderr,"[nvn-vulkan] ATTACHMENT_MODE pid=%d sequence=%llu flags=%d after_frame=%llu mono_ns=%llu\n",
+        getpid(),sequence,flags,(unsigned long long)completed_frame,(unsigned long long)dm_android_nvn_clock_ns());
+}
+static void attachment_ab_frame(uint64_t frame) {
+    if(!getenv("DM_VK_AB_CONTROL")){attachment_ab_poll(frame);return;}
+    const NvnAttachmentStats *a=&G.attachment_stats;
+    fprintf(stderr,"[nvn-vulkan] ATTACHMENT_FRAME pid=%d frame=%llu sequence=%llu flags=%d mono_ns=%llu width=%u height=%u draws=%llu clear_loads=%llu inline_clears=%llu transfer_clears=%llu discard_stores=%llu logical_load_bytes=%llu logical_store_bytes=%llu\n",
+        getpid(),(unsigned long long)frame,(unsigned long long)attachment_ab_sequence,G.attachment_flags,
+        (unsigned long long)dm_android_nvn_clock_ns(),G.swap_extent.width,G.swap_extent.height,
+        (unsigned long long)G.draws,(unsigned long long)a->clear_loads,(unsigned long long)a->inline_clears,
+        (unsigned long long)a->transfer_clears,(unsigned long long)a->discard_stores,
+        (unsigned long long)a->load_bytes_avoided,(unsigned long long)a->store_bytes_avoided);
+    attachment_ab_poll(frame);
+}
 static void pass_end_at(int line) { if(S.in_pass) { G.pass_end_sites[line&4095]++;if(G.profile_detail&&G.profile_frames==30)fprintf(stderr,"[nvn-vulkan] PASSLOG seg=%u rt=%s ps=%.6s n=%d bb=%#x uses=%s draws=%llu end_line=%d\n",G.seg_index,G.pass_desc,G.last_ps,G.last_count,G.last_barrier_bits,G.last_uses,(unsigned long long)(G.draws-G.pass_draws0),line);occlusion_end();vkCmdEndRenderPass(S.command); S.in_pass=0;
     if(S.pt_open){S.pt_open=0;vkCmdWriteTimestamp(S.command,VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,S.pass_ts,S.pt[S.npt].q0+1);S.pt[S.npt].q1=S.pt[S.npt].q0+1;S.pt[S.npt].draws=G.draws-S.pt_draws0;S.npt++;} } }
 #define pass_end() pass_end_at(__LINE__)
@@ -946,7 +979,8 @@ static void sub_begin_ctx(VkSubmission *ctx) {
     S.phase=SUBMISSION_RECORDING;S.epoch=++G.recording_epoch;S.ticket=0;S.recorder=pthread_self();G.active=1;
     S.nwrites=S.nevents=S.ntemporary=S.npipeline=S.npass=S.nread_snapshots=S.ndirect_reads=0;S.in_pass=0;
     S.pending_clear=0;S.flushing_clear=0;S.pass_discard=0;
-    {int flags=atomic_load(&attachment_override);G.attachment_flags=flags<0?G.attachment_defaults:flags;}
+    if(!G.present_count&&!attachment_ab_sequence)attachment_ab_poll(0);
+    {int flags=atomic_load(&attachment_override);G.attachment_flags=flags<0?G.attachment_defaults:flags;atomic_store(&attachment_applied,G.attachment_flags);}
     S.ndriver_tables=0;memset(S.driver_table_slots,0,sizeof S.driver_table_slots);memset(S.last_driver_table,0,sizeof S.last_driver_table);
     S.nocc=S.ntime=0;S.ncounter=0;S.nview=0;S.nbuffer_view=0;memset(S.view_table,0,sizeof S.view_table);
     S.occlusion_reset_count=S.timestamp_reset_count=S.pass_reset_count=0;
@@ -3173,6 +3207,7 @@ uint64_t mtl_present(const tex_t *source,double period,const int crop[4]) {
                 memcpy(G.trace_shader,key,16);G.trace_shader[16]=0;
             }
             fprintf(stderr,"[nvn-vulkan] TRACE_NEXT_FRAME frame=%llu\n",(unsigned long long)G.present_count+2);}}
+    attachment_ab_frame(G.present_count+1);
     if(async_present){G.active=0;async_enqueue_locked(&S,1);uint64_t pticket=++G.present_count;pthread_mutex_unlock(&G.lock);return pticket;}
     if(S.nwrites || S.nevents || S.ncounter)die("present has unpublished guest effects",S.epoch);
     submission_publish(&S);submission_released(&S);
