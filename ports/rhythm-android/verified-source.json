@@ -571,7 +571,7 @@
     },
     {
       "path": "dm/host/hle_port_stage2.c",
-      "sha256": "55d15211990bfb4eb968ea9ee45ac1abb6494fb68aa92bbf28ada9ef71d4e578"
+      "sha256": "02d5851e427b70af43de21b5fedd2aec5415670ac53c78b6ce1fb8741dfd7cdb"
     },
     {
       "path": "dm/host/hle_port_stubs.c",
@@ -655,5 +655,14 @@
   "export_repairs": [
     "Repair an already-corrupted diagnostic string in the excluded Apple branch so GCC can lex the source",
     "Include stdbool.h explicitly for GCC host filesystem regressions"
+  ],
+  "publication_adjustments": [
+    {
+      "paths": [
+        "dm/host/audio_layout.md",
+        "dm/host/hle_port_stage2.c"
+      ],
+      "change": "Replace workstation paths in documentation and comments only; runtime behavior unchanged."
+    }
   ]
 }

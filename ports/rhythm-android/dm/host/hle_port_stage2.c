@@ -1,7 +1,7 @@
 // 【骨架第三批】剩下那些"确实要走系统服务、而宿主没有该服务"的接管，集中放在这里（不摊进各自的 hle_*.c，
 // 好让"移植新增的部分"一处可见）。
 //
-// 哪些**不做**接管，是根据实测判定的（工具：`F:\ning\.tools\svc_scan.py`，它扫每个函数的地址范围里有没有
+// 哪些**不做**接管，是根据实测判定的（工具：`<workspace>\.tools\svc_scan.py`，它扫每个函数的地址范围里有没有
 // 指向 PLT 导入的 `bl`，从而判断这个子系统是否真的碰系统服务）：
 //   · nn::fontll（13 个符号）：58 个定义符号里只有 30 次 PLT 调用，全部指向 fontll 自己或 FSS_*/map_char 回调
 //     → **纯库代码**（字体数据由 LoadFont(data,…) 自己喂进来），不接管，SDK 自己的实现就能跑。
@@ -14,7 +14,7 @@
 // [Skeleton, third batch] The remaining "this really goes to a system service and the host has no such service"
 // takeovers, kept together here so that everything the port adds is visible in one place.
 //
-// What is deliberately NOT taken over was decided from measurement (`F:\ning\.tools\svc_scan.py` scans each function's
+// What is deliberately NOT taken over was decided from measurement (`<workspace>\.tools\svc_scan.py` scans each function's
 // address range for `bl` to a PLT import, i.e. whether the subsystem really touches a service):
 //   · nn::fontll (13 symbols): 58 defined symbols, only 30 PLT calls, all to fontll itself or FSS_*/map_char callbacks
 //     -> pure library code (font data is fed in through LoadFont(data,...)); the SDK's own implementation runs fine.

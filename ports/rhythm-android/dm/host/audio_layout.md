@@ -1,14 +1,14 @@
 # 《節奏天國 奇蹟之星》用到的 `nn::audio` AudioRenderer：结构与 ABI（实测）
 
 偏移以本作 `sdk.patched.bin` / `main.patched.bin` 為依據；欄位的語義需要另外核對。2026-10-16 已修正舊版把 WaveBuffer 的起訖樣本位置誤認成格式資訊，以及把 bool 回傳值誤認成 Result 的錯誤。不能只憑讀寫偏移宣稱語義已確認。
-工具：`F:\ning\d2r-mobile\dm\tools\sdis.py`（作者自带的带符号反汇编器）+ `F:\ning\.tools\audio_abi.py`（我写的调用点定位器，
+工具：`<workspace>\d2r-mobile\dm\tools\sdis.py`（作者自带的带符号反汇编器）+ `<workspace>\.tools\audio_abi.py`（我写的调用点定位器，
 用 PLT stub 找 `bl` 目标）。复现命令见每节末尾。
 
 ---
 
 ## 1. 本作实际导入的 AudioRenderer 入口（37 个）
 
-分成五组（完整 mangled 名见 `F:\ning\game\hle-worklist.txt`）：
+分成五组（完整 mangled 名见 `<workspace>\game\hle-worklist.txt`）：
 
 | 组 | 符号 |
 |---|---|
@@ -202,12 +202,12 @@ AudioRenderer現使用shared低延遲／GAME usage，註冊error callback；回�
 ## 8. 复现命令
 
 ```powershell
-$py='F:\ning\.tools\venv311\Scripts\python.exe'
-$sd='F:\ning\d2r-mobile\dm\tools\sdis.py'
+$py='<workspace>\.tools\venv311\Scripts\python.exe'
+$sd='<workspace>\d2r-mobile\dm\tools\sdis.py'
 # 结构：反汇编 SDK 里的实现
-& $py $sd F:\ning\game\out\sdk.patched.bin '_ZN2nn5audio32InitializeAudioRendererParameterEPNS0_22AudioRendererParameterE' 40
-& $py $sd F:\ning\game\out\sdk.patched.bin 0x2274c0 34          # AppendWaveBuffer 内层
+& $py $sd <workspace>\game\out\sdk.patched.bin '_ZN2nn5audio32InitializeAudioRendererParameterEPNS0_22AudioRendererParameterE' 40
+& $py $sd <workspace>\game\out\sdk.patched.bin 0x2274c0 34          # AppendWaveBuffer 内层
 # ABI：定位本作 main 里的调用点
-& $py F:\ning\.tools\audio_abi.py F:\ning\game\out\main.patched.bin `
+& $py <workspace>\.tools\audio_abi.py <workspace>\game\out\main.patched.bin `
     '_ZN2nn5audio17OpenAudioRendererEPNS0_19AudioRendererHandleEPNS_2os11SystemEventERKNS0_22AudioRendererParameterEPvm'
 ```
