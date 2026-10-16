@@ -13,6 +13,7 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <time.h>
 
 struct dm_flags g_flag;
 uint64_t g_t0_ns;
@@ -226,6 +227,12 @@ static void change_focus(int active) {
     int fd=open(log.fileSystemRepresentation,O_WRONLY|O_CREAT|O_TRUNC,0600);
     if(fd>=0){dup2(fd,STDERR_FILENO);close(fd);}setvbuf(stderr,NULL,_IONBF,0);
     g_t0_ns=now_ns();g_flag.fs=1;g_flag.svc=1;g_flag.dbg=1;
+    struct timespec mono;
+    if(!clock_gettime(CLOCK_MONOTONIC,&mono)) {
+        uint64_t mono_ns=(uint64_t)mono.tv_sec*1000000000ull+(uint64_t)mono.tv_nsec;
+        LOG("IPAD_PACING_CLOCK source=host host_minus_monotonic_ns=%lld",
+            (long long)g_t0_ns-(long long)mono_ns);
+    }
     lifecycle=dispatch_queue_create("org.rhythmhost.lifecycle",DISPATCH_QUEUE_SERIAL);
     AVAudioSession *audio=AVAudioSession.sharedInstance;NSError *error=nil;
     if(![audio setCategory:AVAudioSessionCategoryPlayback mode:AVAudioSessionModeDefault options:0 error:&error] ||

@@ -8,7 +8,11 @@ static uint64_t read_clock(clockid_t id) {
     struct timespec t;if(clock_gettime(id,&t))abort();
     return (uint64_t)t.tv_sec*1000000000ull+(uint64_t)t.tv_nsec;
 }
-uint64_t dm_android_nvn_clock_ns(void) {return read_clock(CLOCK_MONOTONIC);}
+extern uint64_t now_ns(void);
+/* NVN AcquireTexture supplies deadlines from the host's mach_absolute_time
+ * clock. CLOCK_MONOTONIC is a separate Darwin clock domain: even a constant
+ * offset makes every short frame wait sleep for that offset again. */
+uint64_t dm_android_nvn_clock_ns(void) {return now_ns();}
 uint64_t dm_android_nvn_thread_cpu_ns(void) {return read_clock(CLOCK_THREAD_CPUTIME_ID);}
 void dm_android_nvn_schedule_thread(const char *role) {
     pthread_setname_np(role);
