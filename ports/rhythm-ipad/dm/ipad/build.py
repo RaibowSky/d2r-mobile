@@ -55,6 +55,7 @@ for p in vendor.rglob('*'):
 notices=app/'Licenses';notices.mkdir(exist_ok=True)
 for p in (root/'dm/third_party/ryujinx-audio').rglob('*'):
     if p.is_file():shutil.copyfile(p,notices/p.name)
+shutil.copyfile(root/'dm/third_party/bcdec/LICENSE',notices/'bcdec-LICENSE.txt')
 with zipfile.ZipFile(build/'RhythmHost-shell.zip','w',zipfile.ZIP_DEFLATED) as z:
     for p in app.rglob('*'):
         if p.is_file():z.write(p,p.relative_to(build))

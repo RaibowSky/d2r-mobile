@@ -48,7 +48,9 @@ void dm_android_front_presented(uint64_t frame) {
     if(frame==1 || frame%600==0)persist_phase("遊戲執行中");
 }
 void *dm_android_native_window(void) {return native_layer;}
-static int input_source_ready(void *opaque) {(void)opaque;return atomic_load(&input_ready)&&atomic_load(&foreground);}
+/* Bind validates that the UIKit route exists; it cannot depend on the
+ * post-bind flag. Foreground loss separately cancels all logical contacts. */
+static int input_source_ready(void *opaque) {(void)opaque;return native_layer!=NULL;}
 static int suspend_graphics(int on) {dm_gfx_suspend(on);return 0;}
 static int pause_audio(int on) {dm_audio_suspend(on);dm_audio_renderer_suspend(on);return 0;}
 static void path(char *dst,size_t n,const char *base,const char *leaf) {
@@ -199,7 +201,10 @@ static void *game_thread(void *opaque) {
 @end
 
 static void change_focus(int active) {
-    atomic_store(&foreground,active);if(!active){dm_android_input_cancel();((GameController *)controller).held=0;}
+    atomic_store(&foreground,active);if(!active){
+        dm_android_input_cancel();((GameController *)controller).held=0;
+        [((GameController *)controller).surface.contacts removeAllObjects];
+    }
     if(!atomic_load(&started))return;
     dispatch_async(lifecycle,^{
         pause_audio(1);dm_gfx_suspend(1);

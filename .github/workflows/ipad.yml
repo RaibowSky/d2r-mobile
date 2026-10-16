@@ -11,6 +11,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+      - name: Check source-only payload
+        run: python3 ports/rhythm-ipad/audit_source.py
       - name: Compile source-only iPad shell
         run: python3 ports/rhythm-ipad/dm/ipad/build.py
       - name: Save build and diagnostics
