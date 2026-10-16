@@ -14,6 +14,7 @@
 #include "nvn_mtl.h"
 #include "nvn_dirty.h"
 #include "nvn_dirty_summary.h"
+#include "nvn_vk_pool_table.h"
 #include "../tex/nvn_deswizzle.h"
 #include "../tex/nvn_bcdec.h"
 #include <stdatomic.h>
@@ -26,11 +27,11 @@
 #include <math.h>
 #include <dlfcn.h>
 #include <unistd.h>
+#include <limits.h>
 #include "../../android/nvn_platform_backend.h"
 
 void dm_guest_write_prepare(void *address,size_t length);
 
-#define LIMIT_POOLS 512
 #define LIMIT_OBJECTS 4096
 #define LIMIT_BINDINGS 64
 #define LIMIT_WRITES 4096
@@ -182,7 +183,7 @@ static struct {
     VkPhysicalDeviceMemoryProperties memory; VkPhysicalDeviceProperties properties; VkBool32 depth_clamp_supported,depth_bounds_supported;
     VkPipelineCache pipeline_cache;
     VkSubmission submission_slot,submission_slot2;VkSubmission *current_submission;VkSemaphore swap_finished[16];int async_enabled,completing,async_drain_after_submit;uint64_t recording_epoch;
-    VBuffer support,zero; VPool pools[LIMIT_POOLS]; int npool;
+    VBuffer support,zero; VPool *pools; int npool; size_t pool_capacity; unsigned pool_peak; uint64_t pool_deletes;
     PoolUpload pool_uploads[UPLOAD_BUCKETS][UPLOAD_WAYS];uint64_t upload_age;
     int disable_dirty_uploads,enable_writeback_prepare,enable_writeback_coalesce,event_trace;
     uint64_t profile_pool_uploaded_bytes,profile_pool_reused_ranges,profile_pool_reused_bytes;
@@ -526,10 +527,21 @@ void dm_vk_graphics_end(void) {
 }
 void mtl_pool_add(const void *mem,uint64_t size) {
     mtl_init(); pthread_mutex_lock(&G.lock);
-    if(!mem || G.npool==LIMIT_POOLS || size>UINTPTR_MAX-(uintptr_t)mem) die("memory pool bounds",size);
+    if(!mem || size>UINTPTR_MAX-(uintptr_t)mem) die("memory pool address/size bounds",size);
+    if(G.npool==INT_MAX)die("memory pool count overflow",G.npool);
     for(int i=0;i<G.npool;i++) if(G.pools[i].guest==mem) die("duplicate memory pool",(long long)(uintptr_t)mem);
+    if((size_t)G.npool==G.pool_capacity){
+        void *next=NULL;size_t capacity=0;
+        if(!nvn_vk_pool_table_reserve(G.pools,G.pool_capacity,(size_t)G.npool+1,sizeof(*G.pools),&next,&capacity))
+            die("memory pool registry allocation",errno);
+        G.pools=next;G.pool_capacity=capacity;
+        fprintf(stderr,"[nvn-vulkan] POOL_TABLE_GROW capacity=%zu metadata_bytes=%zu live=%d\n",capacity,capacity*sizeof(*G.pools),G.npool);
+    }
     VPool *pool=&G.pools[G.npool++]; pool->guest=mem;
-    *pool=(VPool){.guest=mem,.size=size,.serial=++G.pool_adds};G.pool_revision++; pthread_mutex_unlock(&G.lock);
+    *pool=(VPool){.guest=mem,.size=size,.serial=++G.pool_adds};G.pool_revision++;
+    if((unsigned)G.npool>G.pool_peak)G.pool_peak=(unsigned)G.npool;
+    if(G.npool%128==0)fprintf(stderr,"[nvn-vulkan] POOL_TABLE_STATS live=%d peak=%u capacity=%zu adds=%llu deletes=%llu\n",G.npool,G.pool_peak,G.pool_capacity,(unsigned long long)G.pool_adds,(unsigned long long)G.pool_deletes);
+    pthread_mutex_unlock(&G.lock);
 }
 static void pool_materialize(VPool *pool) {
     if(pool->v.b)return;
@@ -557,7 +569,7 @@ int mtl_gpu_addr(uint64_t addr,uint64_t len,void **buf,uint64_t *off,uint64_t *g
 void mtl_pool_del(const void *mem) {
     if(G.active) die("pool deleted during submission",(long long)(uintptr_t)mem);
     pthread_mutex_lock(&G.lock);async_drain_locked(); for(int i=0;i<G.npool;i++) if(G.pools[i].guest==mem) {
-        buffer_free(&G.pools[i].v); G.pools[i]=G.pools[--G.npool];G.pool_revision++; pthread_mutex_unlock(&G.lock); return; }
+        buffer_free(&G.pools[i].v); G.pools[i]=G.pools[--G.npool];G.pool_revision++;G.pool_deletes++; pthread_mutex_unlock(&G.lock); return; }
     pthread_mutex_unlock(&G.lock); die("unknown memory pool delete",(long long)(uintptr_t)mem);
 }
 static int overlap(uint64_t a,uint64_t an,uint64_t b,uint64_t bn) { return a<b+bn && b<a+an; }
