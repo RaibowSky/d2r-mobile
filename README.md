@@ -65,6 +65,8 @@ git diff --cached --check
 
 ## 來源與授權
 
+感謝 [jhaizhou-ops](https://github.com/jhaizhou-ops) 的 iOS 相容層，以及 [dodola](https://github.com/dodola) 的 Android 相容層。
+
 保留 [MIT 授權](LICENSE)與第三方元件的授權及來源聲明。
 本專案為非官方相容層，與任天堂及遊戲權利人無隸屬關係。
 本倉庫不提供遊戲下載、解密金鑰或簽名材料。

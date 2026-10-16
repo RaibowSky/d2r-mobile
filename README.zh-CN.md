@@ -19,4 +19,6 @@ CI 仅构建不含游戏内容的外壳，不提供带游戏或签名材料的�
 扫描不能保证发现所有未知格式的数据，也不能取代审查。
 
 完整说明、平台建置入口与验证限制见 [繁體中文 README](README.md)。
+感谢 [jhaizhou-ops](https://github.com/jhaizhou-ops) 的 iOS 兼容层，以及 [dodola](https://github.com/dodola) 的 Android 兼容层。
+
 保留 [MIT 授权](LICENSE)和第三方声明；本项目与任天堂及游戏权利人无隶属关系。
