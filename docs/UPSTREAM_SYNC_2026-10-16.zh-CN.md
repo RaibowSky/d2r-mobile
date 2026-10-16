@@ -47,7 +47,7 @@
 python3 dm/android/tests/run_merge_checks.py --output /tmp/d2r-upstream-merge
 ```
 
-机器记录见 [UPSTREAM_SYNC_2026-10-16.json](UPSTREAM_SYNC_2026-10-16.json)。本机完整日志位于 `D:/AndroidSwitch/build/android-measured-optimizations/`。构建使用现有工作区生成的 `romfs_samples.h`；这不等于全新克隆的 APK 打包流程已经补齐。
+机器记录见 [UPSTREAM_SYNC_2026-10-16.json](UPSTREAM_SYNC_2026-10-16.json)。本机完整日志位于 `<workspace>/build/android-measured-optimizations/`。构建使用现有工作区生成的 `romfs_samples.h`；这不等于全新克隆的 APK 打包流程已经补齐。
 
 这些结果是交叉编译和 Linux 主机测试，不能替代 Android 驱动、实际游戏、功耗或热稳定测试。Windows 环境没有执行 Apple/Metal 测试。后续真机性能验证仍应在同一局交替 A/B、热稳定后取最后 30 秒、按实际显示间隔计掉帧，并用游戏数据确定场景。
 

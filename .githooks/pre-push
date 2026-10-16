@@ -1,0 +1,4 @@
+#!/bin/sh
+set -eu
+audit_python=$(git config --get rhythm.auditPython || printf '%s' python3)
+exec "$audit_python" tools/pre_push_audit.py "$@"

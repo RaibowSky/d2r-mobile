@@ -21,7 +21,7 @@
 
 ## 2. 场景、配置与测量方法
 
-- 设备：荣耀 PPG-AN00，序列号 `AVAY025422000548`；Adreno 830，Android 17 / API 37。
+- 设备：荣耀 PPG-AN00，序列号 `<DEVICE_SERIAL>`；Adreno 830，Android 17 / API 37。
 - 完整游戏使用原有私有 Turnip 驱动：Mesa 26.2.3 `git-fbc44a3bcc`，driver id 18；保留 `private-vulkan-sysmem` 和 `present-60fps` 标记、3D scale `1.0`。本轮未切换驱动或系统性能设置。**当前是 sysmem 路径，本轮结果不能代表 GMEM 分块路径的带宽收益。**
 - 游戏为固定 build91738；先验证 main 中 `0x457e40` 的原始指令，再读取该版本的玩家槽、单位桶、路径和区域链。不能套用上游 build94012 的地址。原 main.nso SHA-256：`0ffc74e2a537adb951e173545f9ba0a751a57a924ea58b13675157c88adb27af`。
 - 正式采样保持同一 PID `22643`、同一局、区域 `1`（营地）、玩家 id `1`、单位 `0x7704496380`、路径 `0x77046bde60`、位置定点值 `(318734336, 370507776)`。每约 5 秒读取一次真实游戏数据，所有计入的窗口都保持上述身份和位置；没有用截图判断场景。
@@ -74,7 +74,7 @@
 
 ## 5. 产物、复现与可追溯记录
 
-本地原始数据根目录：`D:/AndroidSwitch/build/android-measured-optimizations/fullgame-ab-20261016`。
+本地原始数据根目录：`<workspace>/build/android-measured-optimizations/fullgame-ab-20261016`。
 
 | 产物 | 用途 | SHA-256 |
 | --- | --- | --- |
@@ -89,13 +89,13 @@
 
 ```powershell
 # 在用户已停留营地、启用 attachment-ab 标记后重启过游戏、已有生效的模式文件，且只读场景探针已推送后运行；输出目录必须新建。
-python -X utf8 dm/android/tests/capture_attachment_game.py --serial AVAY025422000548 --output D:/AndroidSwitch/build/android-measured-optimizations/repeat-game-ab --level 1 --warmup 180 --max-warmup 600 --seconds 90 --tail 30
+python -X utf8 dm/android/tests/capture_attachment_game.py --serial <DEVICE_SERIAL> --output <workspace>/build/android-measured-optimizations/repeat-game-ab --level 1 --warmup 180 --max-warmup 600 --seconds 90 --tail 30
 
 # 重算本次保存的实际显示间隔和同局补采。
-python -X utf8 dm/android/tests/summarize_attachment_game.py D:/AndroidSwitch/build/android-measured-optimizations/fullgame-ab-20261016/run-01 --supplement D:/AndroidSwitch/build/android-measured-optimizations/fullgame-ab-20261016/run-02-final-repeat
+python -X utf8 dm/android/tests/summarize_attachment_game.py <workspace>/build/android-measured-optimizations/fullgame-ab-20261016/run-01 --supplement <workspace>/build/android-measured-optimizations/fullgame-ab-20261016/run-02-final-repeat
 
 # 从当前源码编译 Java/DEX，保留基础 APK 的其他资源；该脚本不安装或启动 App。
-python -X utf8 dm/android/tests/package_worktree_apk.py --base-apk D:/AndroidSwitch/build/android-measured-optimizations/fullgame-ab-20261016/attachment-ab.apk --native D:/AndroidSwitch/build/android-measured-optimizations/libd2r_mobile_android.so --jdk D:/AndroidSwitch/tools/strato-jdk17/jdk-17.0.20.1+1 --output D:/AndroidSwitch/build/android-measured-optimizations/repeat-menu-package
+python -X utf8 dm/android/tests/package_worktree_apk.py --base-apk <workspace>/build/android-measured-optimizations/fullgame-ab-20261016/attachment-ab.apk --native <workspace>/build/android-measured-optimizations/libd2r_mobile_android.so --jdk <workspace>/tools/strato-jdk17/jdk-17.0.20.1+1 --output <workspace>/build/android-measured-optimizations/repeat-menu-package
 ```
 
 采集脚本只写运行时模式文件并读取日志，不操作游戏输入。场景探针 `scene_91738_probe.c` 以 app UID 只读访问 `/proc/PID/mem`，不调用或修改 guest 函数。基础 APK、原游戏模块、私有驱动及着色器缓存均为已有本地资源，不包含在仓库中。
