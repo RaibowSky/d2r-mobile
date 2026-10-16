@@ -1,8 +1,10 @@
-# 节奏天国《奇迹之星》移动版宿主
+# Switch ARM64 原生宿主：Android / iPad 适配实验
 
-本 fork 提供《节奏天国 奇迹之星》的 Android 适配和实验性 iPad 宿主，
+本 fork 为一款自备的 Switch 游戏提供 Android 适配和实验性 iPad 宿主，
 基于 [dodola/d2r-mobile](https://github.com/dodola/d2r-mobile)。
-仓库名称沿用上游；根目录 `dm/` 的暗黑破坏神功能和性能说明不代表本作的验证结果。
+仓库名称沿用上游；根目录 `dm/` 的暗黑破坏神功能和性能说明不代表该适配目标的验证结果。
+
+本项目为技术研究用途，仅支持用户自行合法取得的游戏文件，不提供也不协助取得任何游戏内容。
 
 | 分支 | 内容与状态 |
 |---|---|
@@ -22,3 +24,4 @@ CI 仅构建不含游戏内容的外壳，不提供带游戏或签名材料的�
 感谢 [jhaizhou-ops](https://github.com/jhaizhou-ops) 的 iOS 兼容层，以及 [dodola](https://github.com/dodola) 的 Android 兼容层。
 
 保留 [MIT 授权](LICENSE)和第三方声明；本项目与任天堂及游戏权利人无隶属关系。
+本仓库不提供游戏下载、解密密钥或签名材料。
