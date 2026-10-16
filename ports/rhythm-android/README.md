@@ -36,6 +36,14 @@ Windows 亦可用 NDK `prebuilt/windows-x86_64/bin/make.exe` 和 `Unix Makefiles
 
 ## 未簽名 APK
 
+預設顯示名稱為「節奏天國」，並停用 `debuggable`。需要 debugger 或 `adb run-as`
+的本機開發／裝置測試時，明確傳入 `--debug`；勿將該包當作發布版。
+打包工具會核對 aapt2 產生的二進位 manifest。
+Application ID 保留 `org.d2r.binaryprobe`，維持與既有安裝及私有存檔目錄相同的身份；
+更新仍須使用相同簽名。Java/JNI 類別名稱暫不更改。
+`dm/android/tests/package_worktree_apk.py` 是本機開發工具，沿用輸入 APK 的 manifest，
+不是發布流程；不得將其產物當作已停用 debug 的發布包。
+
 需要 JDK 17、Android SDK platform 34 和 build-tools 35.0.0：
 
 ```sh

@@ -15,6 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: python3 tools/audit_source.py
+      - run: python3 tools/test_package_manifest.py
       - run: python3 dm/android/tests/run_merge_checks.py --output build/tests/merge
       - run: python3 dm/android/tests/run_translation_checks.py --output build/tests/translation
       - run: python3 dm/android/tests/run_attachment_checks.py --output build/tests/attachment
