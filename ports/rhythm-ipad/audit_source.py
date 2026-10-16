@@ -14,7 +14,7 @@ for name in filter(None,names):
     assert not any(part.lower() in ('game','local','build','vendor','exefs','romfs','save') for part in p.relative_to(root).parts),name
     data=p.read_bytes()
     assert not data.startswith((b'NSO0',b'\x7fELF',b'\xcf\xfa\xed\xfe',b'PK\x03\x04')),name
-    assert b'-----BEGIN PRIVATE KEY-----' not in data,name
+    assert (b'-----BEGIN '+b'PRIVATE KEY-----') not in data,name
     count+=1
 sources=json.loads((root/'sources.json').read_text())
 assert all((root/source).is_file() for source in sources)
