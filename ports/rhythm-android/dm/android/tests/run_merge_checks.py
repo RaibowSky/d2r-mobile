@@ -36,7 +36,8 @@ def main():
          ['-D__ANDROID__', '-I' + str(include.parent)], [[]]),
         ('save-recovery', ['dm/android/tests/t_fs_host.c', 'dm/host/hle_fs.c',
                            'dm/android/services_fs_probe.c', 'dm/android/services_fs.c', 'dm/android/romfs_image.c'],
-         ['-D__ANDROID__', '-Wno-format', '-Wno-unused-function', '-Wno-format-truncation'],
+         ['-D__ANDROID__', '-include', 'dm/android/tests/fs_probe_exports.h',
+          '-Wno-format', '-Wno-unused-function', '-Wno-format-truncation'],
          [[str(out / 'save-recovery.json')]]),
     ]
     results = []
