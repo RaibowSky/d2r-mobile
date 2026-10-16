@@ -13,7 +13,7 @@ class ManifestTests(unittest.TestCase):
                 p=Path(tmp)/'manifest.xml';prepare_manifest(source,p,debug)
                 root=ET.parse(p).getroot();app=root.find('application')
                 self.assertEqual(root.get('package'),'org.d2r.binaryprobe')
-                self.assertEqual(app.get(ANDROID+'label'),'節奏天國')
+                self.assertEqual(app.get(ANDROID+'label'),'Switch Host')
                 self.assertEqual(app.get(ANDROID+'allowBackup'),'false')
                 self.assertEqual(app.get(ANDROID+'debuggable'),'true' if debug else 'false')
 

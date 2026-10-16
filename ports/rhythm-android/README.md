@@ -1,4 +1,4 @@
-# Android 節奏遊戲適配
+# Switch Host：Android 適配
 
 這是從本機已驗證版本整理的獨立 Android 目標，基於 `dodola/d2r-mobile`
 的 fork。上游原有目標保持原樣；此目錄不是通用的 D2 移植更新。
@@ -36,7 +36,7 @@ Windows 亦可用 NDK `prebuilt/windows-x86_64/bin/make.exe` 和 `Unix Makefiles
 
 ## 未簽名 APK
 
-預設顯示名稱為「節奏天國」，並停用 `debuggable`。需要 debugger 或 `adb run-as`
+預設顯示名稱為「Switch Host」，並停用 `debuggable`。需要 debugger 或 `adb run-as`
 的本機開發／裝置測試時，明確傳入 `--debug`；勿將該包當作發布版。
 打包工具會核對 aapt2 產生的二進位 manifest。
 Application ID 保留 `org.d2r.binaryprobe`，維持與既有安裝及私有存檔目錄相同的身份；

@@ -3,7 +3,7 @@
   "unchanged_source_files": [
     {
       "path": "dm/android/AndroidManifest.xml",
-      "sha256": "9d96ea02582cb3d0a1a2346a7401af8316bf83ed61e6639d913c973eceacfdac"
+      "sha256": "eeb6b1d3135065d1ec7d44a33a70f5ed7f59a36469c4a49b810ffe861b56d71e"
     },
     {
       "path": "dm/android/audio_aaudio.h",
@@ -668,7 +668,7 @@
       "paths": [
         "dm/android/AndroidManifest.xml"
       ],
-      "change": "Rename display label to Rhythm Heaven and default to non-debuggable; retain application identity and backup policy."
+      "change": "Set display label to Switch Host and default to non-debuggable; retain application identity and backup policy."
     }
   ]
 }

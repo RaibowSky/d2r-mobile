@@ -1,4 +1,4 @@
-# 《節奏天國 奇蹟之星》用到的 `nn::audio` AudioRenderer：结构与 ABI（实测）
+# `nn::audio` AudioRenderer：结构与 ABI（实测）
 
 偏移以本作 `sdk.patched.bin` / `main.patched.bin` 為依據；欄位的語義需要另外核對。2026-10-16 已修正舊版把 WaveBuffer 的起訖樣本位置誤認成格式資訊，以及把 bool 回傳值誤認成 Result 的錯誤。不能只憑讀寫偏移宣稱語義已確認。
 工具：`<workspace>\d2r-mobile\dm\tools\sdis.py`（作者自带的带符号反汇编器）+ `<workspace>\.tools\audio_abi.py`（我写的调用点定位器，
