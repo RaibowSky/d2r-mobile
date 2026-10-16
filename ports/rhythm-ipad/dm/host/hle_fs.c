@@ -343,7 +343,7 @@ static int set_guest_name(const char *hp, const char *path) {
     const char *physical = strrchr(hp, '/') + 1;
 #ifdef DM_GAME_PORT
     if (strcmp(physical, guest)) return setxattr(hp, FS_GUEST_NAME, guest, strlen(guest), 0, XATTR_NOFOLLOW);
-    if (!removexattr(hp, FS_GUEST_NAME, XATTR_NOFOLLOW) || errno == ENODATA || errno == ENOTSUP || errno == EOPNOTSUPP) return 0;
+    if (!removexattr(hp, FS_GUEST_NAME, XATTR_NOFOLLOW) || errno == ENOATTR || errno == ENODATA || errno == ENOTSUP || errno == EOPNOTSUPP) return 0;
 #else
     if (strcmp(physical, guest)) return setxattr(hp, FS_GUEST_NAME, guest, strlen(guest), 0, XATTR_NOFOLLOW);
     if (!removexattr(hp, FS_GUEST_NAME, XATTR_NOFOLLOW) || errno == ENOATTR) return 0;

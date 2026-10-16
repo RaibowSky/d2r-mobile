@@ -68,7 +68,10 @@ int dm_android_fs_remove_tree(const char *path) {
 static int copy_guest_name(int source, int destination) {
     ssize_t size = fgetxattr(source, DM_ANDROID_GUEST_NAME_XATTR, NULL, 0, 0, 0);
     if (size < 0) {
-        if (errno == ENODATA || errno == ENOTSUP || errno == EOPNOTSUPP) return 0;
+        /* Darwin reports a missing optional attribute as ENOATTR. ENODATA
+         * is a different, defined errno there, so the compatibility alias
+         * alone cannot make an ordinary unannotated save directory clone. */
+        if (errno == ENOATTR || errno == ENODATA || errno == ENOTSUP || errno == EOPNOTSUPP) return 0;
         return -1;
     }
     if (size > 0x300) { errno = EINVAL; return -1; }
