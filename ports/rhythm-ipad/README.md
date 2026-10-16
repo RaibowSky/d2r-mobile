@@ -1,9 +1,10 @@
-# Experimental rhythm-game iPad host
+# Experimental Switch ARM64 iPad host
 
 This independent target preserves the upstream host and its Android/iOS targets.
 It starts from the game-specific Android host adaptations and reuses the signed
 Guest.framework loader, CoreAudio mixer, and NVN replay through MoltenVK 1.4.2.
 The upstream fork base is `dodola/d2r-mobile` commit `642480b`.
+The tested target is one owner-supplied title, 《節奏天國 奇蹟之星》.
 
 Status: work in progress. Compilation and device execution must be reported
 separately. No iPad gameplay success is claimed by a successful shell build.
