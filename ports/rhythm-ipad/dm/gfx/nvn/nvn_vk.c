@@ -385,13 +385,16 @@ static void backend_init(void) {
     if(!dm_vkCreateInstance)die("MoltenVK create instance unavailable",0);
     VkApplicationInfo app={.sType=VK_STRUCTURE_TYPE_APPLICATION_INFO,.pApplicationName="Rhythm iPad Host",.apiVersion=VK_API_VERSION_1_1};
     int validation=getenv("DM_VULKAN_VALIDATION")!=NULL;
-    const char *ie[]={VK_KHR_SURFACE_EXTENSION_NAME,VK_EXT_METAL_SURFACE_EXTENSION_NAME,VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME,VK_EXT_DEBUG_UTILS_EXTENSION_NAME};
+    /* This target links MoltenVK directly, without the Vulkan loader. The
+     * loader-only portability enumeration extension is not exposed by MoltenVK.
+     * Requesting it aborts startup with VK_ERROR_EXTENSION_NOT_PRESENT. */
+    const char *ie[]={VK_KHR_SURFACE_EXTENSION_NAME,VK_EXT_METAL_SURFACE_EXTENSION_NAME,VK_EXT_DEBUG_UTILS_EXTENSION_NAME};
     const char *layers[]={"VK_LAYER_KHRONOS_validation"};
     VkDebugUtilsMessengerCreateInfoEXT debug={.sType=VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
         .messageSeverity=VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT|VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT,
         .messageType=VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT|VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT|VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT,.pfnUserCallback=validation_message};
     VkInstanceCreateInfo ii={.sType=VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,.pApplicationInfo=&app,
-        .flags=VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR,.enabledExtensionCount=validation?4u:3u,.ppEnabledExtensionNames=ie,.enabledLayerCount=validation?1u:0u,.ppEnabledLayerNames=validation?layers:NULL,.pNext=validation?&debug:NULL}; CHECK(vkCreateInstance(&ii,NULL,&G.instance));
+        .flags=0,.enabledExtensionCount=validation?3u:2u,.ppEnabledExtensionNames=ie,.enabledLayerCount=validation?1u:0u,.ppEnabledLayerNames=validation?layers:NULL,.pNext=validation?&debug:NULL}; CHECK(vkCreateInstance(&ii,NULL,&G.instance));
     if(validation){PFN_vkCreateDebugUtilsMessengerEXT create=(PFN_vkCreateDebugUtilsMessengerEXT)dm_vk_get(G.instance,"vkCreateDebugUtilsMessengerEXT");if(!create)die("validation debug messenger unavailable",0);CHECK(create(G.instance,&debug,NULL,&validation_messenger));fprintf(stderr,"[nvn-vulkan] VALIDATION_ENABLED\n");}
     dm_vk_resolve(G.instance);
     uint32_t n=0; CHECK(vkEnumeratePhysicalDevices(G.instance,&n,NULL)); if(!n) die("Vulkan physical device",0);
