@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <sched.h>
 #include <time.h>
+#include "relro_pages.h"
 
 // 预留一整块客体地址空间，按 Horizon 分区（地址值直接用宿主 mmap 得到的真地址）。只占地址、不占内存。
 // 大小 5 GB：游戏要的是开头 1 GB（别名区、栈）+ 一整块堆（应用内存池 3285 MiB，见下面 APP_POOL），合计约 4.2 GB；
@@ -179,14 +180,26 @@ uint64_t svc_dispatch(int num, uint64_t *regs, uint64_t orig_addr) {
         if (!size || (size & 0xfff) || addr + size < addr) { regs[0] = 0xCA01; return 0; }
         if (perm != 0 && perm != 1 && perm != 3) { regs[0] = 0xD801; return 0; }
         int owned = addr >= (uint64_t)g_heap && addr + size <= (uint64_t)g_heap + g_heap_cur;
+        int module_relro = 0;
         for (int i = 0; i < g_nmod; ++i) {
             uint64_t base = (uint64_t)g_mod[i].base;
             if (addr >= base && addr + size <= base + g_mod[i].size) owned = 1;
+            /* Only accommodate partial pages inside module writable data,
+             * never in executable text, the key page, or the guest heap. */
+            if (perm == 1 && addr >= base + g_mod[i].data_off &&
+                addr + size <= base + g_mod[i].key_page_off) module_relro = 1;
         }
         if (!owned) { regs[0] = 0xDC01; return 0; }
         long page = sysconf(_SC_PAGESIZE);
-        if (page <= 0 || addr % (uint64_t)page || size % (uint64_t)page)
-            die("SetMemoryPermission range cannot be represented by host pages");
+        uint64_t host_addr=addr,host_size=size;
+        if (page <= 0) die("SetMemoryPermission host page size");
+        if (addr % (uint64_t)page || size % (uint64_t)page) {
+            if (!module_relro || !dm_relro_host_pages(addr,size,(uint64_t)page,&host_addr,&host_size)) {
+                regs[0]=0xD801;return 0;
+            }
+            LOG("IPAD_RELRO_SUBPAGE guest=%#llx+%#llx host=%#llx+%#llx page=%ld partial_edges_keep_existing_permissions",
+                addr,size,host_addr,host_size,page);
+        }
         int prot = perm == 0 ? PROT_NONE : perm == 1 ? PROT_READ : PROT_READ | PROT_WRITE;
         pthread_mutex_lock(&g_permission_mutex);
         for (unsigned i = 0; i < g_permission_lock_count; ++i) {
@@ -196,7 +209,7 @@ uint64_t svc_dispatch(int num, uint64_t *regs, uint64_t orig_addr) {
                 regs[0] = 0xD401; return 0;
             }
         }
-        if (mprotect((void *)addr, size, prot)) die("SetMemoryPermission mprotect errno=%d", errno);
+        if (host_size && mprotect((void *)host_addr, host_size, prot)) die("SetMemoryPermission mprotect errno=%d", errno);
         pthread_mutex_unlock(&g_permission_mutex);
         regs[0] = 0; return 0;
     }
