@@ -56,9 +56,15 @@ GitHub Actions 只編譯**未簽名、沒有遊戲內容的外殼**。
 
 ```sh
 python tools/audit_public_source.py --history
+python tools/audit_public_source.py --index
 git diff --cached --stat
 git diff --cached --check
 ```
+
+每份新 clone 建議執行 `python tools/install_audit_hook.py` 啟用本機 pre-push 檢查。
+它會掃描實際待推送提交及中間提交，並保留既有自訂 hook 設定。
+GitHub Actions 在推送後才執行，不能阻止首次上傳；本機 hook 仍可被略過，
+不取代人工審查。歷史中的路徑／裝置識別會明確警示，本次沒有改寫公開歷史。
 
 上游保留的介面索引、地址與手寫 shader 適配屬既有技術資料，見
 [docs/DERIVED.md](docs/DERIVED.md)；不應誤當作本作可執行的 shader binary 或遊戲資源。

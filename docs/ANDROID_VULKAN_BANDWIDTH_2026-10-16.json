@@ -344,7 +344,7 @@
       "pack-report.json": "aa683fa55a6fd298a77242b91ced466e210f1728cbb61f546cd63e4594a41268",
       "shader_index.bin": "e76ec45c54f6c3be6b3a144ce77a00cec6b2ab96be4897612fdd9f58a8913318"
     },
-    "serial": "AVAY025422000548",
+    "serial": "<DEVICE_SERIAL>",
     "phases": [
       {
         "phase": "0",
@@ -470,7 +470,7 @@
           "-O2",
           "dm/gfx/tests/t_attachment_plan.c",
           "-o",
-          "/mnt/d/AndroidSwitch/build/android-measured-optimizations/attachment-host-final/normal"
+          "<workspace-wsl>/build/android-measured-optimizations/attachment-host-final/normal"
         ]
       },
       {
@@ -495,7 +495,7 @@
           "-no-pie",
           "dm/gfx/tests/t_attachment_plan.c",
           "-o",
-          "/mnt/d/AndroidSwitch/build/android-measured-optimizations/attachment-host-final/sanitized"
+          "<workspace-wsl>/build/android-measured-optimizations/attachment-host-final/sanitized"
         ]
       }
     ],
@@ -515,7 +515,7 @@
         "arguments": [],
         "passed": true,
         "command": [
-          "/mnt/d/AndroidSwitch/build/android-measured-optimizations/translation-after-attachments/queue-normal"
+          "<workspace-wsl>/build/android-measured-optimizations/translation-after-attachments/queue-normal"
         ],
         "log": "queue-normal-.log",
         "stdout": "TRANSLATION_BACKPRESSURE capacity=32 jobs=33 poll_and_timeout=passed\nTRANSLATION_FIFO mode=0 producers=4 jobs=20000 passed=1\nTRANSLATION_FIFO mode=1 producers=4 jobs=20000 passed=1\nTRANSLATION_FIFO mode=2 producers=4 jobs=20000 passed=1\nTRANSLATION_QUEUE passed=1 ordered_jobs=60033 modes=3"
@@ -528,7 +528,7 @@
         ],
         "passed": true,
         "command": [
-          "/mnt/d/AndroidSwitch/build/android-measured-optimizations/translation-after-attachments/adapter-normal",
+          "<workspace-wsl>/build/android-measured-optimizations/translation-after-attachments/adapter-normal",
           "0"
         ],
         "log": "adapter-normal-0.log",
@@ -542,7 +542,7 @@
         ],
         "passed": true,
         "command": [
-          "/mnt/d/AndroidSwitch/build/android-measured-optimizations/translation-after-attachments/adapter-normal",
+          "<workspace-wsl>/build/android-measured-optimizations/translation-after-attachments/adapter-normal",
           "1"
         ],
         "log": "adapter-normal-1.log",
@@ -554,7 +554,7 @@
         "arguments": [],
         "passed": true,
         "command": [
-          "/mnt/d/AndroidSwitch/build/android-measured-optimizations/translation-after-attachments/queue-sanitized"
+          "<workspace-wsl>/build/android-measured-optimizations/translation-after-attachments/queue-sanitized"
         ],
         "log": "queue-sanitized-.log",
         "stdout": "TRANSLATION_BACKPRESSURE capacity=32 jobs=33 poll_and_timeout=passed\nTRANSLATION_FIFO mode=0 producers=4 jobs=20000 passed=1\nTRANSLATION_FIFO mode=1 producers=4 jobs=20000 passed=1\nTRANSLATION_FIFO mode=2 producers=4 jobs=20000 passed=1\nTRANSLATION_QUEUE passed=1 ordered_jobs=60033 modes=3"
@@ -567,7 +567,7 @@
         ],
         "passed": true,
         "command": [
-          "/mnt/d/AndroidSwitch/build/android-measured-optimizations/translation-after-attachments/adapter-sanitized",
+          "<workspace-wsl>/build/android-measured-optimizations/translation-after-attachments/adapter-sanitized",
           "0"
         ],
         "log": "adapter-sanitized-0.log",
@@ -581,7 +581,7 @@
         ],
         "passed": true,
         "command": [
-          "/mnt/d/AndroidSwitch/build/android-measured-optimizations/translation-after-attachments/adapter-sanitized",
+          "<workspace-wsl>/build/android-measured-optimizations/translation-after-attachments/adapter-sanitized",
           "1"
         ],
         "log": "adapter-sanitized-1.log",
@@ -596,20 +596,20 @@
     "failure": "VK_ERROR_LAYER_NOT_PRESENT (-6)",
     "global_settings_changed": false,
     "library_sha256": "db7447027e28db95584e9fde8a57cc1f28c2dd09defcbe2f2b76ee2bbc65bf09",
-    "log": "D:\\AndroidSwitch\\build\\android-measured-optimizations\\attachment-device\\validation-device.log",
+    "log": "<workspace>\\build\\android-measured-optimizations\\attachment-device\\validation-device.log",
     "log_sha256": "3a76979313c4f5f72cea63253310f423325dfcd819c501b22bdfe34613cae11a"
   },
   "raw_receipts": {
     "attachment-device-final": {
-      "path": "D:\\AndroidSwitch\\build\\android-measured-optimizations\\attachment-device-final\\result.json",
+      "path": "<workspace>\\build\\android-measured-optimizations\\attachment-device-final\\result.json",
       "sha256": "daf7cd1fecb69992425d86613c273ec2e4f111e7f117ef1beca75ca4bb8aebfe"
     },
     "attachment-host-final": {
-      "path": "D:\\AndroidSwitch\\build\\android-measured-optimizations\\attachment-host-final\\result.json",
+      "path": "<workspace>\\build\\android-measured-optimizations\\attachment-host-final\\result.json",
       "sha256": "15098b619e7b57601c93dbcca9211eecc6326e5775f2fc60f32c85d520ca2925"
     },
     "translation-after-attachments": {
-      "path": "D:\\AndroidSwitch\\build\\android-measured-optimizations\\translation-after-attachments\\result.json",
+      "path": "<workspace>\\build\\android-measured-optimizations\\translation-after-attachments\\result.json",
       "sha256": "4c2fec89827838d07e5653c6351eb51b90f495fd429b659ee332d1d80998c13e"
     }
   }

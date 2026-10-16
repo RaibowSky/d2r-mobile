@@ -1,6 +1,6 @@
 # Android 独立翻译线程：实现与离线验证
 
-日期：2026-10-16。工作目录：`D:\AndroidSwitch\worktrees\android-measured-optimizations`。
+日期：2026-10-16。工作目录：`<workspace>\worktrees\android-measured-optimizations`。
 分支：`codex/android-measured-optimizations`；基线：`5924a97`（已合并上游 v1.0.17 / `9de307e`）。
 
 本轮完成 Android 的 CPU 图形翻译线程接入、NDK 编译和离线回归。没有连接手机，没有执行 Vulkan GPU 工作，没有测帧率、掉帧、温度、内存或画面正确性。
@@ -44,16 +44,16 @@ Android 同步对象分别记录已入队和已执行的栅栏操作次数。入
 
 离线适配层测试使用真实 pthread 和生产适配代码，但后端栅栏、GPU 完成、纹理快照服务及 ADPF 服务由夹具控制。它验证 CPU 调度和同步协议，不证明 Vulkan 驱动执行或像素结果正确。真实资源释放和脏页/GPU 写回交互仍需后续真机验证。
 
-机器可读记录、源文件 SHA-256 和产物 SHA-256 见同目录的 `ANDROID_TRANSLATION_WORKER_2026-10-16.json`。本机原始日志在 `D:\AndroidSwitch\build\android-measured-optimizations` 下的 `translation-checks`、`translation-regressions` 和 `translation-tsan`。
+机器可读记录、源文件 SHA-256 和产物 SHA-256 见同目录的 `ANDROID_TRANSLATION_WORKER_2026-10-16.json`。本机原始日志在 `<workspace>\build\android-measured-optimizations` 下的 `translation-checks`、`translation-regressions` 和 `translation-tsan`。
 
 ## 5. 复现与结论边界
 
 在 Windows 执行：
 
 ```powershell
-& 'C:/Users/dodol/AppData/Local/Android/Sdk/cmake/3.22.1/bin/cmake.exe' --build D:/AndroidSwitch/build/android-measured-optimizations -j 6
-wsl -d Ubuntu -- python3 /mnt/d/AndroidSwitch/worktrees/android-measured-optimizations/dm/android/tests/run_translation_checks.py --output /mnt/d/AndroidSwitch/build/android-measured-optimizations/translation-checks
-wsl -d Ubuntu -- python3 /mnt/d/AndroidSwitch/worktrees/android-measured-optimizations/dm/android/tests/run_merge_checks.py --output /mnt/d/AndroidSwitch/build/android-measured-optimizations/translation-regressions
+& '<android-sdk>/cmake/3.22.1/bin/cmake.exe' --build <workspace>/build/android-measured-optimizations -j 6
+wsl -d Ubuntu -- python3 <workspace-wsl>/worktrees/android-measured-optimizations/dm/android/tests/run_translation_checks.py --output <workspace-wsl>/build/android-measured-optimizations/translation-checks
+wsl -d Ubuntu -- python3 <workspace-wsl>/worktrees/android-measured-optimizations/dm/android/tests/run_merge_checks.py --output <workspace-wsl>/build/android-measured-optimizations/translation-regressions
 ```
 
 本轮可以确认的是编译通过，以及已覆盖的 CPU 队列、栅栏和生命周期协议通过离线测试。入队前的命令头遍历和资源改写处的保守屏障仍有 CPU 成本，必须在设备上测量净收益。用户提供的“85 → 56 次掉帧”等上游数据没有被当作本次 Android 实测结果。
