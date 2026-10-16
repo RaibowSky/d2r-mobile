@@ -229,7 +229,7 @@
     {
       "test": "save-recovery",
       "arguments": [
-        "/mnt/d/AndroidSwitch/build/android-measured-optimizations/merge-checks/save-recovery.json"
+        "<workspace-wsl>/build/android-measured-optimizations/merge-checks/save-recovery.json"
       ],
       "passed": true,
       "last_line": "SAVE_RECOVERY checks=66 failures=0 host_linux=1"

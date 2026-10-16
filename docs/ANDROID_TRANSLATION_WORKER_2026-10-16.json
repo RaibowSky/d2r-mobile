@@ -11,8 +11,8 @@
     "abi": "arm64-v8a",
     "api": 29,
     "configuration": "RelWithDebInfo",
-    "command": "cmake --build D:/AndroidSwitch/build/android-measured-optimizations -j 6",
-    "artifact": "D:\\AndroidSwitch\\build\\android-measured-optimizations\\libd2r_mobile_android.so",
+    "command": "cmake --build <workspace>/build/android-measured-optimizations -j 6",
+    "artifact": "<workspace>\\build\\android-measured-optimizations\\libd2r_mobile_android.so",
     "artifact_bytes": 2787024,
     "artifact_sha256": "2f0ff07d7b3e79549422ca832b2cd1ff193863999a0af569fd688adda800b920",
     "elf_class": "ELF64",
@@ -32,7 +32,7 @@
         "arguments": [],
         "passed": true,
         "command": [
-          "/mnt/d/AndroidSwitch/build/android-measured-optimizations/translation-checks/queue-normal"
+          "<workspace-wsl>/build/android-measured-optimizations/translation-checks/queue-normal"
         ],
         "log": "queue-normal-.log",
         "stdout": "TRANSLATION_BACKPRESSURE capacity=32 jobs=33 poll_and_timeout=passed\nTRANSLATION_FIFO mode=0 producers=4 jobs=20000 passed=1\nTRANSLATION_FIFO mode=1 producers=4 jobs=20000 passed=1\nTRANSLATION_FIFO mode=2 producers=4 jobs=20000 passed=1\nTRANSLATION_QUEUE passed=1 ordered_jobs=60033 modes=3"
@@ -45,7 +45,7 @@
         ],
         "passed": true,
         "command": [
-          "/mnt/d/AndroidSwitch/build/android-measured-optimizations/translation-checks/adapter-normal",
+          "<workspace-wsl>/build/android-measured-optimizations/translation-checks/adapter-normal",
           "0"
         ],
         "log": "adapter-normal-0.log",
@@ -59,7 +59,7 @@
         ],
         "passed": true,
         "command": [
-          "/mnt/d/AndroidSwitch/build/android-measured-optimizations/translation-checks/adapter-normal",
+          "<workspace-wsl>/build/android-measured-optimizations/translation-checks/adapter-normal",
           "1"
         ],
         "log": "adapter-normal-1.log",
@@ -71,7 +71,7 @@
         "arguments": [],
         "passed": true,
         "command": [
-          "/mnt/d/AndroidSwitch/build/android-measured-optimizations/translation-checks/queue-sanitized"
+          "<workspace-wsl>/build/android-measured-optimizations/translation-checks/queue-sanitized"
         ],
         "log": "queue-sanitized-.log",
         "stdout": "TRANSLATION_BACKPRESSURE capacity=32 jobs=33 poll_and_timeout=passed\nTRANSLATION_FIFO mode=0 producers=4 jobs=20000 passed=1\nTRANSLATION_FIFO mode=1 producers=4 jobs=20000 passed=1\nTRANSLATION_FIFO mode=2 producers=4 jobs=20000 passed=1\nTRANSLATION_QUEUE passed=1 ordered_jobs=60033 modes=3"
@@ -84,7 +84,7 @@
         ],
         "passed": true,
         "command": [
-          "/mnt/d/AndroidSwitch/build/android-measured-optimizations/translation-checks/adapter-sanitized",
+          "<workspace-wsl>/build/android-measured-optimizations/translation-checks/adapter-sanitized",
           "0"
         ],
         "log": "adapter-sanitized-0.log",
@@ -98,7 +98,7 @@
         ],
         "passed": true,
         "command": [
-          "/mnt/d/AndroidSwitch/build/android-measured-optimizations/translation-checks/adapter-sanitized",
+          "<workspace-wsl>/build/android-measured-optimizations/translation-checks/adapter-sanitized",
           "1"
         ],
         "log": "adapter-sanitized-1.log",
@@ -192,7 +192,7 @@
       {
         "test": "save-recovery",
         "arguments": [
-          "/mnt/d/AndroidSwitch/build/android-measured-optimizations/translation-regressions/save-recovery.json"
+          "<workspace-wsl>/build/android-measured-optimizations/translation-regressions/save-recovery.json"
         ],
         "passed": true,
         "last_line": "SAVE_RECOVERY checks=66 failures=0 host_linux=1"
@@ -204,7 +204,7 @@
     "status": "blocked_by_host_runtime",
     "passed": false,
     "error": "FATAL: ThreadSanitizer: unexpected memory mapping",
-    "log": "D:\\AndroidSwitch\\build\\android-measured-optimizations\\translation-tsan\\queue-sanitized-.log"
+    "log": "<workspace>\\build\\android-measured-optimizations\\translation-tsan\\queue-sanitized-.log"
   },
   "limits": [
     "CPU tests use a controllable backend, not a Vulkan driver.",

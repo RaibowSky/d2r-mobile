@@ -184,7 +184,7 @@ namespace Ryujinx.Common.Configuration
 
                     if (string.IsNullOrEmpty(logDir))
                     {
-                        // NOTE: Should evaluate to "C:\Users\user\AppData\Roaming\Ryujinx\Logs".
+                        // NOTE: Should evaluate to "%APPDATA%/Ryujinx/Logs".
                         logDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), DefaultBaseDir, "Logs");
 
                         try

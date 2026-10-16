@@ -33,7 +33,7 @@ Metal 可以在结束编码时改变 store action，Vulkan render pass 则提前
 
 ## 3. 荣耀真机结果
 
-设备：荣耀 PPG-AN00，ADB 序列号 `AVAY025422000548`。设备属性报告 Android 17 / API 37，系统 GPU 为 **Adreno (TM) 830**。使用 Qualcomm 系统 Vulkan 驱动，日志中的 build 为 `7853d15211, I1594d2c915, 1783590945`。没有切换私有驱动，没有安装 APK，没有改动游戏或存档。
+设备：荣耀 PPG-AN00，ADB 序列号 `<DEVICE_SERIAL>`。设备属性报告 Android 17 / API 37，系统 GPU 为 **Adreno (TM) 830**。使用 Qualcomm 系统 Vulkan 驱动，日志中的 build 为 `7853d15211, I1594d2c915, 1783590945`。没有切换私有驱动，没有安装 APK，没有改动游戏或存档。
 
 每阶段 20 个用例，6 阶段共 **120 个用例**。包含完整/重复/部分/空清除、绘制后清除、提交末尾清除、不同尺寸附件、稀疏颜色槽、深度/模板独立保留、先拷贝后覆盖、重复 CALL、不同 mip/数组层及重绑目标。通过生产 NVN 记录器、独立翻译线程和 Vulkan 后端在 GPU 上执行。
 
@@ -69,10 +69,10 @@ Metal 可以在结束编码时改变 store action，Vulkan render pass 则提前
 在当前 worktree 执行：
 
 ```powershell
-& 'C:/Users/dodol/AppData/Local/Android/Sdk/cmake/3.22.1/bin/cmake.exe' --build D:/AndroidSwitch/build/android-measured-optimizations -j 6
-wsl -d Ubuntu -- python3 /mnt/d/AndroidSwitch/worktrees/android-measured-optimizations/dm/android/tests/run_attachment_checks.py --output /mnt/d/AndroidSwitch/build/android-measured-optimizations/attachment-host-final
-wsl -d Ubuntu -- python3 /mnt/d/AndroidSwitch/worktrees/android-measured-optimizations/dm/android/tests/run_translation_checks.py --output /mnt/d/AndroidSwitch/build/android-measured-optimizations/translation-after-attachments
-python -X utf8 dm/android/tests/run_attachment_device.py --fixture-tools D:/AndroidSwitch/tools/d2r-mobile-port --cache D:/AndroidSwitch/analysis/d2r-mobile-port/shader-replay-cache --build D:/AndroidSwitch/build/android-measured-optimizations --output D:/AndroidSwitch/build/android-measured-optimizations/attachment-device-final --serial AVAY025422000548 --run-device
+& '<android-sdk>/cmake/3.22.1/bin/cmake.exe' --build <workspace>/build/android-measured-optimizations -j 6
+wsl -d Ubuntu -- python3 <workspace-wsl>/worktrees/android-measured-optimizations/dm/android/tests/run_attachment_checks.py --output <workspace-wsl>/build/android-measured-optimizations/attachment-host-final
+wsl -d Ubuntu -- python3 <workspace-wsl>/worktrees/android-measured-optimizations/dm/android/tests/run_translation_checks.py --output <workspace-wsl>/build/android-measured-optimizations/translation-after-attachments
+python -X utf8 dm/android/tests/run_attachment_device.py --fixture-tools <workspace>/tools/d2r-mobile-port --cache <workspace>/analysis/d2r-mobile-port/shader-replay-cache --build <workspace>/build/android-measured-optimizations --output <workspace>/build/android-measured-optimizations/attachment-device-final --serial <DEVICE_SERIAL> --run-device
 ```
 
 真机脚本读取已有本地夹具模板与着色器资产，编译当前 worktree 的实现；这些外部资产不包含在本次提交里，SHA-256 保存在 receipt 中。省略 `--run-device` 仅编译，不连接手机。原始日志位于上述输出目录；机器可读摘要、源文件与产物哈希见 `ANDROID_VULKAN_BANDWIDTH_2026-10-16.json`。
