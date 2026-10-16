@@ -17,7 +17,7 @@ uint64_t dm_game_res(int docked);
 static pthread_key_t g_keyown;   // ?祉瑪蝔霂瑕??TLS ??/ 蝥輻??砍?箇?????嚗??賣?怠偏嚗?| raw pointers of the TLS block / thread-local region allocated by this thread (see the end of the function)
 static pthread_once_t g_keyown_once = PTHREAD_ONCE_INIT;
 static void own_free(void *p) { void **own = p; free(own[0]); free(own[1]); free(own); }
-static void own_key_init(void) { if (pthread_key_create(&g_keyown, own_free)) die("?遣蝥輻??砍????桀仃韐?); }
+static void own_key_init(void) { if (pthread_key_create(&g_keyown, own_free)) die("guest TLS ownership key allocation failed"); }
 #endif
 void guest_thread_init(void) {
     pthread_setspecific(g_keygate, (void *)dm_gate);

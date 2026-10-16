@@ -610,10 +610,6 @@
       "sha256": "6826a22ff4964f03d652413941e4f44585f7a2988ec6dc3472300150094d495d"
     },
     {
-      "path": "dm/host/thread.c",
-      "sha256": "c813d9dc5de2b701c521bf16ccf9ce282c6bd5be587937373f9f70fcadf87db6"
-    },
-    {
       "path": "dm/ios/Sources/dm_touch_controls.c",
       "sha256": "56684dbb130a00de6ad3cb17f1ffae0ce61bbe8d244636e74e713bb988183756"
     },
@@ -659,5 +655,8 @@
     }
   ],
   "resource_probe": "opt-in local header, excluded from Git",
-  "hash_normalization": "UTF-8, LF, trailing whitespace removed, single terminal newline; original source semantics unchanged"
+  "hash_normalization": "UTF-8, LF, trailing whitespace removed, single terminal newline; original source semantics unchanged",
+  "export_repairs": [
+    "Repair an already-corrupted diagnostic string in the excluded Apple branch so GCC can lex the source"
+  ]
 }
