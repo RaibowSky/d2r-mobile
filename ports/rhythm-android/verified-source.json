@@ -1,0 +1,667 @@
+{
+  "local_android_baseline": "2026-10-16 scoped review checkpoint",
+  "unchanged_source_files": [
+    {
+      "path": "dm/android/AndroidManifest.xml",
+      "sha256": "241f4341b3920aa3e17347297d0b0a87e91d1e0acbe96c1b8fb6dae2eb835f68"
+    },
+    {
+      "path": "dm/android/audio_aaudio.h",
+      "sha256": "e92d4a18d6bc7a1dfe2527936b976c65712c57b27cf0a664e7aeb7c392e6ac61"
+    },
+    {
+      "path": "dm/android/audio_aaudio.inc",
+      "sha256": "a6354be0d7eba3d53a00d37843f2e3dc191903a01f6c66e48dd3176c0eaa84ca"
+    },
+    {
+      "path": "dm/android/audio_queue_test.c",
+      "sha256": "7fdf814758f95ad16ae3f721235ca5b0129d05dd31e1225348678134daa8263f"
+    },
+    {
+      "path": "dm/android/codec_opus.c",
+      "sha256": "19ddd17ee48c55b2b0b6d7e83a89ca5a39f542037100f66a1a88ad88127917d1"
+    },
+    {
+      "path": "dm/android/diagnostics.c",
+      "sha256": "92ee53914df17c428d46d31f255bc5f0049953734392ec04c5142090f9f33beb"
+    },
+    {
+      "path": "dm/android/font_diagnostics.c",
+      "sha256": "14d89a4e6c68da9746bb954137a276acf4cea5c7a8d6d5c131ce5545e5734be5"
+    },
+    {
+      "path": "dm/android/game_resource_probe.c",
+      "sha256": "bca2e06e50041331f52cf59e492e6f50723046154793d9f84c35f3a770cb0b07"
+    },
+    {
+      "path": "dm/android/gate_check.S",
+      "sha256": "bd9a6cbf5ee61877bdbe901b16e595a1fc3f02279005eb8423f827f17479c9dd"
+    },
+    {
+      "path": "dm/android/generated/rhythm_button_font.h",
+      "sha256": "155772f9e6ecdc862fbf48ce6f787bfebd2b2d4416324a71c7d24c172f4ac781"
+    },
+    {
+      "path": "dm/android/host_probe.c",
+      "sha256": "f83430680f33eac40aaaa653ace1599034458ca96e24615972d0d1cfb391e85f"
+    },
+    {
+      "path": "dm/android/input_backend.c",
+      "sha256": "5f498daec9286dce568b0ff098f8f5833a4666c14e6f737474e86391a7817c0e"
+    },
+    {
+      "path": "dm/android/input_backend.h",
+      "sha256": "8e84d08ca5ada3c43e7f5d42859d7c572dfedd5628412ebae36639d99917918a"
+    },
+    {
+      "path": "dm/android/input_probe.c",
+      "sha256": "565cce304439a6954da3d569fc3c1a5b9ef1e3012a2e1166df52422ef1329b59"
+    },
+    {
+      "path": "dm/android/keyboard_android.c",
+      "sha256": "396a3848888ac7dce4e21e17d52f88d1dab7b6a768b9a681cd418895facef736"
+    },
+    {
+      "path": "dm/android/movie_start.c",
+      "sha256": "958701ff2827ac6a7824ff7aad17d36fec9a860a187473fee76980ad0f482c17"
+    },
+    {
+      "path": "dm/android/nvn_platform_backend.h",
+      "sha256": "3cab64aae2c878c78de55de8996a63dead38066878b686cb11bbffa6b562e583"
+    },
+    {
+      "path": "dm/android/nvn_platform_clock.c",
+      "sha256": "c00f836d438cd240150c40d6d87911a6bd59f173a0e1ee1db7f952bc1fdd6c67"
+    },
+    {
+      "path": "dm/android/nvn_platform_clock.h",
+      "sha256": "cc098e1103638678b535f22a6d0d53160c2c3a437596046fbc64b946aa2f2323"
+    },
+    {
+      "path": "dm/android/nvn_platform_present.inc",
+      "sha256": "720f3b372109ce4da4ac0ec79bdf9d5b1f6f49401de63c282df8891388b76a50"
+    },
+    {
+      "path": "dm/android/nvn_present_policy.h",
+      "sha256": "827773e21ad2c2856a268122ec7c558e8a97c019ded2b9e5b5337f5d37027987"
+    },
+    {
+      "path": "dm/android/nvn_translation_queue.c",
+      "sha256": "b45ed4fbaf0745900c2bf5ba6ebb6526aa22010a792c2d7a792981630a4109bc"
+    },
+    {
+      "path": "dm/android/nvn_translation_queue.h",
+      "sha256": "71cff4089596e08e7ae05a95d815976765538a48bf34afc294fb54d8a31aff7a"
+    },
+    {
+      "path": "dm/android/nvn_translation_sync.h",
+      "sha256": "31af5cf29f1637ac01088fb7dab34c6a8e9a1f405a3c9eed2685c2b1ecba5bf0"
+    },
+    {
+      "path": "dm/android/romfs_image.c",
+      "sha256": "e617056dc6d4ade8fe133f0c512f6fc98b8b294c6ead379954f700f381bcb002"
+    },
+    {
+      "path": "dm/android/romfs_image.h",
+      "sha256": "44db818e8f0883cef9b875c3cefeeae54a7858454398c8c1a157e2dea86e64df"
+    },
+    {
+      "path": "dm/android/services_fs.c",
+      "sha256": "f9a84dd064280d640f63c1ef38768161372a8dc38159c1e70150635a43b90c82"
+    },
+    {
+      "path": "dm/android/services_fs.h",
+      "sha256": "841e5a73e3cfadc2b0df08a45a1ce1ec27b561d8238c158832fc742e4559a9b6"
+    },
+    {
+      "path": "dm/android/services_fs_probe.c",
+      "sha256": "c1c36a307029bcd73460e4b993f6baf40bc0cf256f9f0a75369a3db718ac4641"
+    },
+    {
+      "path": "dm/android/services_platform.c",
+      "sha256": "bbd6aa14bba74cd0327650e8613cb53debaa80ebd8890088d8010a344c5cc78c"
+    },
+    {
+      "path": "dm/android/services_platform.h",
+      "sha256": "971ec0eaa6b3e6f9a2ca8f8ce666f01ea94c0dc49270eb89f2ebe2c64560cb41"
+    },
+    {
+      "path": "dm/android/services_sdk.c",
+      "sha256": "addd59943ee0510d367e2194a7867968aae3f554b0c55246f97a50902f2b4abf"
+    },
+    {
+      "path": "dm/android/services_sdk.h",
+      "sha256": "31b5d6294a2fc2fcded82a0b879d3d8306ebb131fbb11cb9bc87990fde452ea8"
+    },
+    {
+      "path": "dm/android/src/org/d2r/binaryprobe/GameActivity.java",
+      "sha256": "56e8c094cc9fcd7491d53d553e72121eb032bdba83ea87cba43825db0b10fce0"
+    },
+    {
+      "path": "dm/android/src/org/d2r/binaryprobe/GameDisplayMetrics.java",
+      "sha256": "253e0ebdf8760e5d0d8464ed85b036cda6219a4c3506beeea491066d27823239"
+    },
+    {
+      "path": "dm/android/src/org/d2r/binaryprobe/GameViewport.java",
+      "sha256": "7a4f7b3e998adcc3c0a6bd203934fe33babbcfcfd340cbe607544f9f2aa7f0f7"
+    },
+    {
+      "path": "dm/android/src/org/d2r/binaryprobe/RendererOptions.java",
+      "sha256": "4ee847d347eece0119557493f375570884bb7b8263d7148f4d0994d217a01c0e"
+    },
+    {
+      "path": "dm/android/src/org/d2r/binaryprobe/RendererOptionsStore.java",
+      "sha256": "4d41bdf691d51f59eb9c218ea887f7bd28b774038f8bf6ad8ccbe65c58adeb55"
+    },
+    {
+      "path": "dm/android/src/org/d2r/binaryprobe/RendererSettingsDialog.java",
+      "sha256": "3a980ad286f782e31b6a5c05bc93bacf6b5bef2cc22af7eba036843910298ca0"
+    },
+    {
+      "path": "dm/android/src/org/d2r/binaryprobe/RhythmInputState.java",
+      "sha256": "18cbffddd98dfafd9ed1645ed80f76bbd3667d46cbf3d28323d24d4f0344af31"
+    },
+    {
+      "path": "dm/android/src/org/d2r/binaryprobe/ShellTextInputDialog.java",
+      "sha256": "45a406b61f2e830fbfcbef80ebcf0192a6e59fd00bfebec01001986fa72807d0"
+    },
+    {
+      "path": "dm/android/src/org/d2r/binaryprobe/TouchControlsView.java",
+      "sha256": "854194ffff6b6fdeeeb8f3c4683a9302c32e06c43d4ca30e64f7b515c906873b"
+    },
+    {
+      "path": "dm/android/tests/attachment_device_cases.inc",
+      "sha256": "c1eeb96a44cb3e5dff11267940371fe4bac3d549e4df41657416b306598d0ad8"
+    },
+    {
+      "path": "dm/android/tests/capture_attachment_game.py",
+      "sha256": "7e93a86d64ccf794de3e4dba40f094fabc87547bb66dfb53ff25b2db2c485596"
+    },
+    {
+      "path": "dm/android/tests/GameDisplayMetricsTest.java",
+      "sha256": "e6bcdeb39dd300c2aa3bbfc01c3aa196afdb613884179a6eec87c0f5b259b73a"
+    },
+    {
+      "path": "dm/android/tests/package_worktree_apk.py",
+      "sha256": "7d1015ee9abd489721f55b28b825f474d8ec094116e12a910a0307ff947352dc"
+    },
+    {
+      "path": "dm/android/tests/RendererOptionsTest.java",
+      "sha256": "185057a38a24e92c4065ca0261856f925c587404cccd57137ff830f0c1ba2f4f"
+    },
+    {
+      "path": "dm/android/tests/RhythmInputStateTest.java",
+      "sha256": "67f6c2c40eb776d62f78099736a69f7a53705a6b098c8626b6b7510c7f7b5030"
+    },
+    {
+      "path": "dm/android/tests/run_attachment_checks.py",
+      "sha256": "c34702cc0a285b009c94bb61f73a0567bb9ae2f2b697f40692d8d032bddaf14f"
+    },
+    {
+      "path": "dm/android/tests/run_attachment_device.py",
+      "sha256": "8b42816b0c846c3e8344069e35de242b11d9fc5ad21d659ea7c1fa3686e3f498"
+    },
+    {
+      "path": "dm/android/tests/run_merge_checks.py",
+      "sha256": "2f7033507750363d10be7dd090a4706c6b9b5b64e74e7218d7a0b6b23a9a0311"
+    },
+    {
+      "path": "dm/android/tests/run_translation_checks.py",
+      "sha256": "8442cced8bbf8ad533a9c66ff583251b40820af03e0476d90b9b1d946767a985"
+    },
+    {
+      "path": "dm/android/tests/scene_91738_probe.c",
+      "sha256": "1711caa5fed8f70c67009a61dfe3ac9c4fe59a1d305cf56307c76fcf0729b23e"
+    },
+    {
+      "path": "dm/android/tests/summarize_attachment_game.py",
+      "sha256": "822be4ab8ee839ca04077b3b192f2edfa59df98f241b4bd63162d3afa0082c97"
+    },
+    {
+      "path": "dm/android/tests/t_audio_buffer_adapt.c",
+      "sha256": "f6f21acf81ebde1aafbe8b072f4815b519cf6638c2bcd9bbe050b03ae51c49ee"
+    },
+    {
+      "path": "dm/android/tests/t_audio_renderer_device.c",
+      "sha256": "a4cd1838bcd8ef616e9c08ce9d81b4495491a43fe64b29cc14072f7b086c6449"
+    },
+    {
+      "path": "dm/android/tests/t_audio_renderer_lifetime.c",
+      "sha256": "abb6e4469ae1c59867f5c028dfccbe464097d65c1fe741d43d6f279549a2f68a"
+    },
+    {
+      "path": "dm/android/tests/t_audio_renderer_pcm.c",
+      "sha256": "b6017fe78fe1a6878b5e28474cf9f9da4ddc651fae33e4999b8a852670c6ef7c"
+    },
+    {
+      "path": "dm/android/tests/t_audio_reverb.c",
+      "sha256": "39f78ca92b0b277701eec6f69954a3ad54a2ada62adeddb30b70f86ab50e33dc"
+    },
+    {
+      "path": "dm/android/tests/t_fs_host.c",
+      "sha256": "11773eb34e49c32cc34ae1d1082afa7ab1ed265277dd486f595c6f61f8a4219f"
+    },
+    {
+      "path": "dm/android/tests/t_npad_batch.c",
+      "sha256": "9718e87f6a61d5f1d7190c212163cdd959c967234ae3dde3e219c9dd89479a45"
+    },
+    {
+      "path": "dm/android/tests/t_present_policy.c",
+      "sha256": "4fa550d3dc481d366dcc2fbbaa2108b8e015faa7227089fbf3e53cca6900b9f3"
+    },
+    {
+      "path": "dm/android/tests/t_romfs_guest_path.c",
+      "sha256": "8bec548d54771a18f169b89b5fb47686bfb7aa54a1b584d8b25c3f8dbc3ff5f9"
+    },
+    {
+      "path": "dm/android/tests/t_thread_lifetime.c",
+      "sha256": "8f414ee74c05f381e9706c0e3b897b3d231a64bef6d92c6240fc19a321e50416"
+    },
+    {
+      "path": "dm/android/tests/t_translation_present.c",
+      "sha256": "9782a0ce8e75b377ff2eeb840fa69fbd8817e930f3196357db543a0be5aa6266"
+    },
+    {
+      "path": "dm/android/tests/t_translation_queue.c",
+      "sha256": "969fe0f79b34f0adf74d25343001c7d84e05ab7d083879cab2e7f3bd348e2059"
+    },
+    {
+      "path": "dm/android/thread_slots.c",
+      "sha256": "8cb5859b0ec620edc78ae78a63dd66a93c77778e83e05671dd612ddb9cc42418"
+    },
+    {
+      "path": "dm/android/thread_slots.h",
+      "sha256": "67ddc3685dca1c1daa2b375a68887782843ffd5e75f663e2e17181380b139081"
+    },
+    {
+      "path": "dm/android/touch_controls_android.c",
+      "sha256": "699e27ea40f5a1f260cc82f285b93322a30d2be27e01f57b375abdb2a23a54f7"
+    },
+    {
+      "path": "dm/android/vulkan_probe.c",
+      "sha256": "04689007da80cd235585236a76ecf7e244a11225069698d085dfa8dfa1691353"
+    },
+    {
+      "path": "dm/gfx/hle_nv.c",
+      "sha256": "a710d5386d4f51266355f8f8452f4160329ade6fee05c9b00979e4f46ce3404a"
+    },
+    {
+      "path": "dm/gfx/hle_vi.c",
+      "sha256": "647718bfe849b13d335e1dd60b3891adcc53c53c542018c3946081924f3fc26a"
+    },
+    {
+      "path": "dm/gfx/nvn/hle_nvn.c",
+      "sha256": "f94e1a52df758df808e70b25578ce538428b71f698a1c9755ba1b0a5baaf7382"
+    },
+    {
+      "path": "dm/gfx/nvn/include/nvn.h",
+      "sha256": "729b2517623d4647705134617c016661fcd4e618c72f6d4333f439e74398dc28"
+    },
+    {
+      "path": "dm/gfx/nvn/nvn_buffer.h",
+      "sha256": "b71d41e9590da4beb59f0a7f577956952e03c8747213fb3267538c305c8aafa7"
+    },
+    {
+      "path": "dm/gfx/nvn/nvn_count.h",
+      "sha256": "f5ecf3615f9f1d690070183df869c2bfb0eb51daa5f7e79025cd57dcfa9035ea"
+    },
+    {
+      "path": "dm/gfx/nvn/nvn_cover.h",
+      "sha256": "1a69dd6ac3a5fa465b048f4b97733fd408ef3aa2921896f016417391c8b4e862"
+    },
+    {
+      "path": "dm/gfx/nvn/nvn_dirty.c",
+      "sha256": "83bf2012751146dc2d7a56ecd2a8882d111d82ef8d44b891aadef156ad4f7113"
+    },
+    {
+      "path": "dm/gfx/nvn/nvn_dirty.h",
+      "sha256": "236b05c4cf5cf6d3ba72475d1785f3db8333c77bd5347c9a1767afd5a5b77647"
+    },
+    {
+      "path": "dm/gfx/nvn/nvn_dirty_summary.h",
+      "sha256": "a1043c062681db9736451ca420d9385054fdef59567363cd3004b22166c55acc"
+    },
+    {
+      "path": "dm/gfx/nvn/nvn_entry.S",
+      "sha256": "c675985ca564bdf3f7ecc74face5c46cd43244b3e27b2402d9024b6f82ad396d"
+    },
+    {
+      "path": "dm/gfx/nvn/nvn_hmap.h",
+      "sha256": "ef7797bd44d9cc3e47010c9913dd3e1972e64c206ddd05f8beeecb643784c55e"
+    },
+    {
+      "path": "dm/gfx/nvn/nvn_mtl.h",
+      "sha256": "2ad1c6ca4f0361cdac6a603e804a664caa6bd14894da75c52193b46cfb05b623"
+    },
+    {
+      "path": "dm/gfx/nvn/nvn_obj.h",
+      "sha256": "fc825963b0bcf8f063b20daf87528ab9ecef060ee95b3df797f025be366f5c94"
+    },
+    {
+      "path": "dm/gfx/nvn/nvn_pace.h",
+      "sha256": "7e138b32850e7fa44f72a1df3466c2c3c1d17aecb734bfd7d7ffef8896cd66a1"
+    },
+    {
+      "path": "dm/gfx/nvn/nvn_protos.h",
+      "sha256": "547b6c48d9424600bb16686767b9965427fff233de04b7eb4ffc74a9266cfa76"
+    },
+    {
+      "path": "dm/gfx/nvn/nvn_pso_skey.h",
+      "sha256": "17a07f06bf8904803a28b062118cbb8f3ba45325a4e462b60cd80375f5efd2d5"
+    },
+    {
+      "path": "dm/gfx/nvn/nvn_refl.h",
+      "sha256": "fdc1444521057e5f3a7bfc517cdd270d3c8236cdc15982d39078458d90e4f115"
+    },
+    {
+      "path": "dm/gfx/nvn/nvn_rtex.inc",
+      "sha256": "86316c2780bbd011997a6ec78016659c234435afe0a65dd990cd245fd274b2f2"
+    },
+    {
+      "path": "dm/gfx/nvn/nvn_tex.c",
+      "sha256": "051a391ad14ac2e9547b46a69ed2dd791757974f5e8fc8502a98e63f725021d4"
+    },
+    {
+      "path": "dm/gfx/nvn/nvn_tex.h",
+      "sha256": "16b2a3b217d7fce318d8fac2f93f1e95748b4be17f2db5d28c3e2ac5eacc7f3c"
+    },
+    {
+      "path": "dm/gfx/nvn/nvn_thunks.S",
+      "sha256": "daaba4b3525a3e9eb21742583423a5618b6be792d80fa79e8b5b1a600475d1f8"
+    },
+    {
+      "path": "dm/gfx/nvn/nvn_vk.c",
+      "sha256": "75502a33b2e1508d310f08de3def6052630ff2fe437979a8bd850c44f2a2a213"
+    },
+    {
+      "path": "dm/gfx/nvn/nvn_vk_attachment_plan.h",
+      "sha256": "560a4073bd2e1d3166e4286b3c618f9f8583f402d919129d4e294bfcb585acbc"
+    },
+    {
+      "path": "dm/gfx/nvn/nvn_vk_binding_plan.h",
+      "sha256": "77f4e142bfb0a72e627197f5341742f537a129e00bd9a2ecf35346ca29da21a0"
+    },
+    {
+      "path": "dm/gfx/nvn/nvn_vk_command_state.h",
+      "sha256": "b253031ab91c418479dd375df9b30dde4a5149be13f19a8e355db6827fa0a135"
+    },
+    {
+      "path": "dm/gfx/nvn/nvn_vk_command_stream.h",
+      "sha256": "d9a5098300e7c3fea77684bff44373484c9b18e4c439e04473d0db0a8b313880"
+    },
+    {
+      "path": "dm/gfx/nvn/nvn_vk_dispatch.h",
+      "sha256": "e4d3757b16a0806762c5a15f4fe8fe25c3177cc1459673165c18e920e85f0481"
+    },
+    {
+      "path": "dm/gfx/nvn/nvn_vk_pool_upload.h",
+      "sha256": "ffa8466cedfdc2fbfae0ee80b3cf44f067f5ae518036fd474fa17469a0af7f4f"
+    },
+    {
+      "path": "dm/gfx/nvn/nvn_vk_storage_bias.h",
+      "sha256": "bdc5dc5df3b0500c63a0faf107609163bf0e443fd322c3467cae09575e890865"
+    },
+    {
+      "path": "dm/gfx/nvn/nvn_vk_submission.h",
+      "sha256": "4aad1a1469ca91f6c45a04512b88bb44e31d0ad90cfc6edde5d69c1222f83e1a"
+    },
+    {
+      "path": "dm/gfx/nvn/nvn_vk_writeback_plan.h",
+      "sha256": "a670cf7350624f345e7395fb3f597c217257f365a0b8375a1b3b77e4fad7f98c"
+    },
+    {
+      "path": "dm/gfx/nvn/rt_range_check.inc",
+      "sha256": "5ea5738eac7ef458bf08783bb751077f43cf8382492503327d564cafb20ff580"
+    },
+    {
+      "path": "dm/gfx/tests/t_attachment_plan.c",
+      "sha256": "94bd9be88299ea6fac3cfb0e588794185eb6a713e6433d29f698b74dbc33862e"
+    },
+    {
+      "path": "dm/gfx/tests/t_command_state.c",
+      "sha256": "290914aadf0c9fd97a7ce3f82b2c89f454587a49416332e8a7eba298697e9f80"
+    },
+    {
+      "path": "dm/gfx/tests/t_countdown_layout.c",
+      "sha256": "83c3ccb6e25d12723754fe88c8e504ac460ae48937cb484bcd9a0b76e8455e41"
+    },
+    {
+      "path": "dm/gfx/tests/t_cover.c",
+      "sha256": "4335470774a6379704f6e20c32c315236af97108ab3f99455073cfb4ce90f845"
+    },
+    {
+      "path": "dm/gfx/tests/t_dirty_host_hooks.c",
+      "sha256": "44e600c3c18677bbef59e1bff60ab970f01b9acb441aab611ceb8416dfabbe0c"
+    },
+    {
+      "path": "dm/gfx/tests/t_dirty_race.c",
+      "sha256": "e806edcd7c091a67c9c4776c9b9938626ced9c1e6356f40489847daf5c03e463"
+    },
+    {
+      "path": "dm/gfx/tests/t_dirty_slots.c",
+      "sha256": "c7524c1cd6d56c465bed380ecbd029716bde6962f3bd44715e3a2c348e018543"
+    },
+    {
+      "path": "dm/gfx/tests/t_dirty_summary.c",
+      "sha256": "9a9d25ec38c9b8ebeafe766bf1d4e998fa02a09731e9d6f7418133aaecd74cda"
+    },
+    {
+      "path": "dm/gfx/tests/t_hmap.c",
+      "sha256": "727a2ea2dbe0a93c6fd1d6f2d3f3472e6a1120997bfe84d771e605d23e3324c8"
+    },
+    {
+      "path": "dm/gfx/tests/t_linear_texture.c",
+      "sha256": "b0cae129e525b639f0aa1ed4f949cfdfb1972719d145c98a62759fec831b4547"
+    },
+    {
+      "path": "dm/gfx/tests/t_nvn.c",
+      "sha256": "f0c2a49d5caf5dbb89ca1a695cb4b8bbce9e10a4146415e85cc25268d6f57328"
+    },
+    {
+      "path": "dm/gfx/tests/t_nvn_buffer.c",
+      "sha256": "bef31bdbb627c32d36aebc944e57edb70a71dc0a3d5ea162ae8da90d08580e11"
+    },
+    {
+      "path": "dm/gfx/tests/t_pace.c",
+      "sha256": "44ab1450b8d614698c12f9433409652780ed9fd33178969b836a357888bf03f9"
+    },
+    {
+      "path": "dm/gfx/tests/t_scaled_copy_device.c",
+      "sha256": "f680aa628397b0ae5e2d7b85b01db6d7217b1ddb0c78ae0653bb42d8e4a4917d"
+    },
+    {
+      "path": "dm/gfx/tests/t_view_abi.c",
+      "sha256": "53abb606a42ab4b1a77a769226fb20c4eb17ba6e31117c02c54991654e981df7"
+    },
+    {
+      "path": "dm/gfx/tests/t_writeback_plan.c",
+      "sha256": "3caf07ea26131f91ef0dafd2997bf7bfdc5b38b0c5070454771d6408cdc1f304"
+    },
+    {
+      "path": "dm/gfx/tex/nvn_bcdec.c",
+      "sha256": "6760286c7d5ff3a38aeceee70155d86945ccdd15811a36e23c2f26fabbdb1d00"
+    },
+    {
+      "path": "dm/gfx/tex/nvn_bcdec.h",
+      "sha256": "e83efd39966eeae2d6b34de5b916b25f674bee7d1f5c4b7abd50d47b72e0c5aa"
+    },
+    {
+      "path": "dm/gfx/tex/nvn_deswizzle.c",
+      "sha256": "47a68070a76267ed78dc26a4a5fd8086b3cdbd7ab2f22e7dffb23ecc9a3d9a86"
+    },
+    {
+      "path": "dm/gfx/tex/nvn_deswizzle.h",
+      "sha256": "bdbada9d13d198f3fad32462399662648d835bc7584c6c4e07a367b5f0659b8a"
+    },
+    {
+      "path": "dm/gfx/tex/nvn_deswizzle_gpu.h",
+      "sha256": "c7d80bd42df2f55fa09890bf52d610a5b6eec0ec785708636e87d70a3f6559ac"
+    },
+    {
+      "path": "dm/gfx/tex/nvn_fmt_mtl.h",
+      "sha256": "319cde963160339299bbab763f18dbe73847ae616d9c4fd324387e48982dd944"
+    },
+    {
+      "path": "dm/host/ar_reverb3d.inc",
+      "sha256": "d7d92290fd064823b335a2f6b1bb13ae4e481ec26fca5ac3f072715920e4d574"
+    },
+    {
+      "path": "dm/host/dm.h",
+      "sha256": "10fc2a7a6d851781cb884ec0bfaeb6b2323a6678a9003efd236134a37e2098c6"
+    },
+    {
+      "path": "dm/host/dm_input.h",
+      "sha256": "d484d8aacf0c166a45a337172e2e91532fa68d97063c599d0a36e8fc05ddc9d2"
+    },
+    {
+      "path": "dm/host/dm_padmap.h",
+      "sha256": "bb4285c5322e3ab466b65adeb137ecda42bae69a5f66cc3a4c1004714297736a"
+    },
+    {
+      "path": "dm/host/entry.S",
+      "sha256": "05cfc344984852af842d8583ea21d5beaa81d837a5f78c9cbbdf7b53fa694aa6"
+    },
+    {
+      "path": "dm/host/front.h",
+      "sha256": "1a01a9c72e9d105f2472ee40922b01fd64a5f9f0ffafc3662e891eb8c1b8e891"
+    },
+    {
+      "path": "dm/host/hle.c",
+      "sha256": "abda3fbebf99c108ab1beebe8cdd55194baefa676f17538e00231630e94253eb"
+    },
+    {
+      "path": "dm/host/hle.h",
+      "sha256": "0c4c4fcf9db1f4884a8b900e232e90527de01aa2edfc1ee91290fc719e597b2f"
+    },
+    {
+      "path": "dm/host/hle_account.c",
+      "sha256": "8d75f8e03c31401b3bbaa2e1d83ee7d7b7d410d14e15d9e936208a4121bf505d"
+    },
+    {
+      "path": "dm/host/hle_audio.c",
+      "sha256": "3bdebee795fa467aeabe1d55cbc745b8fc9a0d3dc09ec455e40f8a6b5fd57747"
+    },
+    {
+      "path": "dm/host/hle_audio_renderer.c",
+      "sha256": "b732b8989078181b38733b66f1459b0f5f727eefd210e81bdc1bab8f0ce964fe"
+    },
+    {
+      "path": "dm/host/hle_fs.c",
+      "sha256": "9f078b19f09025bf72e493da40718abcbbbd5cf52072677c7084fe1cfc479506"
+    },
+    {
+      "path": "dm/host/hle_guestthread.c",
+      "sha256": "135293ed8ecb7811e8edaf82a36662cff4bb7342bad6f386adaa403c7f547309"
+    },
+    {
+      "path": "dm/host/hle_hid.c",
+      "sha256": "399f4aac0560c1034a4fb784f6ce9d322c77c667a68f4cfca6351187120a0ad3"
+    },
+    {
+      "path": "dm/host/hle_lifecycle.c",
+      "sha256": "67ddd9c89f00aa717ba5ddb2722947e5ef0783c63cdbb203f5c5e47c74b38b55"
+    },
+    {
+      "path": "dm/host/hle_misc.c",
+      "sha256": "68eaa0e5f72701374aca2169e59dcf4aa8193d1c943cdb1a3470ddb4a1671ee0"
+    },
+    {
+      "path": "dm/host/hle_net.c",
+      "sha256": "ffda02187bdef0f9d4bdedda41a51f48f3f9f1152a3ee414607ba1f1fed31504"
+    },
+    {
+      "path": "dm/host/hle_oe.c",
+      "sha256": "f8219a53cb646312f7814dede1a1dd74240cafba616d1ea25c8113dbaeb78118"
+    },
+    {
+      "path": "dm/host/hle_os.c",
+      "sha256": "14e4a73ae7b367d5d7a2217ef5c2d9d854297fd8f69adcb639ab7d1f337ecc6b"
+    },
+    {
+      "path": "dm/host/hle_port_stage2.c",
+      "sha256": "55d15211990bfb4eb968ea9ee45ac1abb6494fb68aa92bbf28ada9ef71d4e578"
+    },
+    {
+      "path": "dm/host/hle_port_stubs.c",
+      "sha256": "c56374adcb9155cb1e2ec0c6a9ad1a5878dceff501f28255c53d6770b522655e"
+    },
+    {
+      "path": "dm/host/hle_sdkinit.c",
+      "sha256": "6592594d6bcd2daa17b84cf998011a8011048abcfbc5218b345c8f1135f2856c"
+    },
+    {
+      "path": "dm/host/hle_svc.c",
+      "sha256": "3b7c463cb4d29cf4ea8ca1316997d1ef5858a1a79e349687674e73c6ed7162e2"
+    },
+    {
+      "path": "dm/host/hle_swkbd.c",
+      "sha256": "2b31cac4ac4a347496b0264b21943cdcf764aa9ad51a71e08e7e1a8f85336e3e"
+    },
+    {
+      "path": "dm/host/hle_thread.c",
+      "sha256": "cd94eb04184b543b3d48bfb2853d61139c557d822aa246e63bf2f245493a7973"
+    },
+    {
+      "path": "dm/host/hle_time.c",
+      "sha256": "a981f1769181d97bfb6a3093e2b080a27ae7d16cc77670a2a55a4a1445c5973e"
+    },
+    {
+      "path": "dm/host/hle_touch.c",
+      "sha256": "006a970f182671463a0f033d6b4787c49bfac1a02e32178a9c6cde175ba979b6"
+    },
+    {
+      "path": "dm/host/loader.c",
+      "sha256": "6826a22ff4964f03d652413941e4f44585f7a2988ec6dc3472300150094d495d"
+    },
+    {
+      "path": "dm/host/thread.c",
+      "sha256": "c813d9dc5de2b701c521bf16ccf9ce282c6bd5be587937373f9f70fcadf87db6"
+    },
+    {
+      "path": "dm/ios/Sources/dm_touch_controls.c",
+      "sha256": "56684dbb130a00de6ad3cb17f1ffae0ce61bbe8d244636e74e713bb988183756"
+    },
+    {
+      "path": "dm/ios/Sources/dm_touch_controls.h",
+      "sha256": "6d090e7dc54d774f7ce0190b8415623d80071e8dbc201744ba0f516c357d34b8"
+    },
+    {
+      "path": "dm/ios/tests/t_touch_controls.c",
+      "sha256": "e2caa829ad97a492ff34084a8cc73f4417e185b37ba8f90c2bcc93d491ba2ad4"
+    },
+    {
+      "path": "dm/third_party/bcdec/bcdec.h",
+      "sha256": "d8c8fb12f19692c42201fce5bd43fa4be54e8fb5d28f2f246d088f40b6e17b31"
+    },
+    {
+      "path": "dm/third_party/bcdec/LICENSE",
+      "sha256": "2414c782587f6e96661cb0d19d752432ddecfcc1a221b4cb12bc2253a54dc5ac"
+    },
+    {
+      "path": "dm/third_party/bcdec/README.md",
+      "sha256": "b4d5a194d96dd642799ec2564b52a52da77010debfd3306d24880e2791ce6c20"
+    },
+    {
+      "path": "dm/third_party/ryujinx-audio/LICENSE.txt",
+      "sha256": "781bbdf040b7d0286c47cca6bffdb9148dfe751c0c9cabdf1a1752412a2e56b4"
+    },
+    {
+      "path": "dm/third_party/ryujinx-audio/SOURCE.md",
+      "sha256": "a37a694c171b6dcba99197aba88b37367c50fefaaef2ee8eca37514265a0e3a6"
+    },
+    {
+      "path": "dm/tools/patch_nso.py",
+      "sha256": "4f8b65a76436cd5958b666808a7cb922c70a6e8652fcc82c2ec240e06686777c"
+    },
+    {
+      "path": "dm/tools/tact_bootlist.py",
+      "sha256": "2180589a882d2253fa801bce337de6bf35dd2f3aeb38d8c40fd7fa52d759a33f"
+    },
+    {
+      "path": "LICENSE",
+      "sha256": "5811600bb8fc4522d3310e8e0e637a1bb14b7c64412f8cfc6234872eb53129b9"
+    }
+  ],
+  "resource_probe": "opt-in local header, excluded from Git",
+  "hash_normalization": "UTF-8, LF, trailing whitespace removed, single terminal newline; original source semantics unchanged"
+}
