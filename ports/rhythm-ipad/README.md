@@ -1,4 +1,4 @@
-# Experimental rhythm-game iPad host
+# Switch Host: experimental iPad
 
 This independent target preserves the upstream host and its Android/iOS targets.
 It starts from the game-specific Android host adaptations and reuses the signed

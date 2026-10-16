@@ -42,7 +42,7 @@ proc=subprocess.run(link,text=True,stdout=subprocess.PIPE,stderr=subprocess.STDO
 (build/'link.log').write_text(proc.stdout);print(proc.stdout)
 if proc.returncode:raise SystemExit(proc.returncode)
 info=dict(CFBundleExecutable='RhythmHost',CFBundleIdentifier='org.rhythmhost.ipad',CFBundleName='RhythmHost',
-          CFBundleDisplayName='節奏遊戲',CFBundlePackageType='APPL',CFBundleShortVersionString='0.1',CFBundleVersion=os.environ.get('GITHUB_RUN_NUMBER','1'),
+          CFBundleDisplayName='Switch Host',CFBundlePackageType='APPL',CFBundleShortVersionString='0.1',CFBundleVersion=os.environ.get('GITHUB_RUN_NUMBER','1'),
           MinimumOSVersion='26.0',UIDeviceFamily=[2],LSRequiresIPhoneOS=True,
           UIRequiresFullScreen=True,UIFileSharingEnabled=True,LSSupportsOpeningDocumentsInPlace=True,
           UISupportedInterfaceOrientations=['UIInterfaceOrientationLandscapeLeft','UIInterfaceOrientationLandscapeRight'],
