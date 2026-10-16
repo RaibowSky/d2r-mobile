@@ -1,0 +1,5 @@
+/build/
+/vendor/
+/local/
+*.ipa
+__pycache__/

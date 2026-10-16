@@ -1,0 +1,25 @@
+name: iPad host
+on:
+  workflow_dispatch:
+  push:
+    branches: [ipad-port]
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: macos-26
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile source-only iPad shell
+        run: python3 ports/rhythm-ipad/dm/ipad/build.py
+      - name: Save build and diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ipad-host
+          path: |
+            ports/rhythm-ipad/build/RhythmHost-shell.zip
+            ports/rhythm-ipad/build/build-report.json
+            ports/rhythm-ipad/build/*.log
+          retention-days: 3
