@@ -22,7 +22,9 @@ static void check_save(const char *directory,const char *value) {
     assert(got==strlen(value) && !memcmp(bytes,value,got));
 }
 int main(void) {
-    char parent[]="/tmp/rhythm-save-test-XXXXXX";assert(mkdtemp(parent));
+    /* /tmp is a Darwin symlink; the owned-tree API intentionally refuses
+     * symlink parents. Use its physical path, as the app sandbox does. */
+    char parent[]="/private/tmp/rhythm-save-test-XXXXXX";assert(mkdtemp(parent));
     char committed[1024],work[1024],reopened[1024],file[1100],link[1100];
     snprintf(committed,sizeof committed,"%s/save",parent);
     snprintf(work,sizeof work,"%s/save.work",parent);
