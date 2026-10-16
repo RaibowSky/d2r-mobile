@@ -202,10 +202,6 @@
       "sha256": "8b42816b0c846c3e8344069e35de242b11d9fc5ad21d659ea7c1fa3686e3f498"
     },
     {
-      "path": "dm/android/tests/run_merge_checks.py",
-      "sha256": "2f7033507750363d10be7dd090a4706c6b9b5b64e74e7218d7a0b6b23a9a0311"
-    },
-    {
       "path": "dm/android/tests/run_translation_checks.py",
       "sha256": "8442cced8bbf8ad533a9c66ff583251b40820af03e0476d90b9b1d946767a985"
     },

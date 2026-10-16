@@ -45,6 +45,8 @@ def main():
     def run(command, log):
         process = subprocess.run(command, cwd=repo, capture_output=True, text=True, timeout=90)
         (out / log).write_text(process.stdout + process.stderr, encoding='utf-8')
+        if process.returncode:
+            print(process.stdout + process.stderr, flush=True)
         process.check_returncode()
         return process.stdout
     for name, sources, flags, runs in tests:

@@ -30,6 +30,7 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
+      - uses: android-actions/setup-android@v3
       - name: SDK and NDK
         run: sdkmanager 'ndk;27.2.12479018' 'platforms;android-34' 'build-tools;35.0.0'
       - name: Build ARM64 native host without ROM samples
