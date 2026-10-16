@@ -119,12 +119,16 @@ def audit(repo, history=False, ref=None, index=False, since=None):
     else:
         names = git(repo, 'ls-files', '-z').decode().split('\0')
         if index:
+            index_entries = []
             for entry in git(repo, 'ls-files', '--stage', '-z').split(b'\0'):
                 if entry:
                     meta, name = entry.split(b'\t', 1)
                     mode, oid, stage = meta.decode().split()
+                    index_entries.append((name.decode(), oid))
                     if mode in ('120000', '160000') or stage != '0':
                         issues.append((name.decode(), 'unreviewed link, submodule or merge conflict'))
+            snapshot = blobs(repo, {oid for name, oid in index_entries})
+            index_by_name = dict(index_entries)
     count = 0
     for name in filter(None, names):
         p = repo / name
@@ -138,7 +142,7 @@ def audit(repo, history=False, ref=None, index=False, since=None):
                 issues.append((name, 'unreviewed link or submodule')); continue
             data = snapshot[oid]
         else:
-            data = git(repo, 'show', f':{name}') if index else p.read_bytes()
+            data = snapshot[index_by_name[name]] if index else p.read_bytes()
         issues.extend((name, reason) for reason in inspect(name, data))
     if since:
         # Check every newly pushed snapshot, including content deleted at the tip.
