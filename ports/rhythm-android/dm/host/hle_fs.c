@@ -19,6 +19,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <stdatomic.h>
+#include <stdbool.h>
 #ifdef __ANDROID__
 #include "../android/services_fs.h"
 #include "../android/romfs_image.h"
