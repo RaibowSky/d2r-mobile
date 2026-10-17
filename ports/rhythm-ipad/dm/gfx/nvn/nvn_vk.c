@@ -15,6 +15,7 @@
 #include "nvn_dirty.h"
 #include "nvn_dirty_summary.h"
 #include "nvn_vk_pool_table.h"
+#include "nvn_vk_texture_snapshot.h"
 #include "../tex/nvn_deswizzle.h"
 #include "../tex/nvn_bcdec.h"
 #include <stdatomic.h>
@@ -111,7 +112,7 @@ typedef struct {
 } VShader;
 typedef struct { uint64_t serial,incarnation; tex_t source; VkImage image; VkDeviceMemory memory;
     VkImageView view; VkFormat format; VkImageLayout layout; uint32_t width,height,depth,bpp; int cpu_owned; uint64_t upload_stamp,version;
-    uint8_t *cpu_snapshot;
+    uint8_t *cpu_snapshot; size_t cpu_snapshot_bytes;
     VkImage sample_copy;VkDeviceMemory sample_memory;VkImageView sample_view;VkImageLayout sample_layout;
     VkImage shadow;VkDeviceMemory shadow_memory;VkImageView shadow_view;VkFormat shadow_format;VkImageLayout shadow_layout;uint64_t shadow_version;uint64_t other_version,sample_other;uint32_t dirty_levels,sc_valid,sc_level,sc_levels,sc_layer,sc_layers;
     VkImageLayout lvl[16];int mixed; /* per-mip layouts, valid only while mixed (then layout is stale) */ } VTexture;
@@ -220,6 +221,7 @@ static struct {
     _Atomic uint64_t fence,completed,present_count,frame; uint64_t draws,pass_count,uploads,pool_adds;
     int trace_frame,trace_ui;_Atomic int window_origin;
     uint64_t profile_pipeline_ns,profile_wait_ns,profile_decode_ns,profile_submits,profile_start_ns,profile_draws,profile_frames;
+    uint64_t profile_texture_candidates,profile_texture_unchanged,profile_texture_compare_bytes;
     uint64_t profile_submit_candidates,profile_candidate_wait_ns,profile_writeback_bytes,profile_events,profile_reports;
     uint64_t profile_writeback_raw_bytes,profile_writeback_raw_ranges,profile_writeback_copy_ranges,profile_writeback_plan_cpu_ns;
     uint64_t profile_write_submits,profile_event_submits,profile_report_submits,profile_trace_submits,profile_cpu_readback_submits,profile_event_wait_submits;
@@ -1247,8 +1249,21 @@ static void texture_transition_levels(VTexture *t,uint32_t base,uint32_t count,V
 /* GPU transfers and CPU streaming can update different compression blocks of
  * one NVN allocation. Compare actual block bytes to the last CPU snapshot so
  * page-level dirtiness never overwrites unrelated GPU-owned contents. */
+static int texture_snapshot_unchanged(VTexture *t,const tex_t *source,uint64_t stamp) {
+    static unsigned samples;
+    if(!t->cpu_snapshot)return 0;
+    G.profile_texture_candidates++;
+    if(t->cpu_snapshot_bytes==source->L.size)G.profile_texture_compare_bytes+=source->L.size;
+    if(!nvn_vk_texture_snapshot_same(t->cpu_snapshot,t->cpu_snapshot_bytes,source->mem,source->L.size))return 0;
+    /* A concurrent write remains newer than the pre-protection stamp. */
+    t->upload_stamp=stamp;G.profile_texture_unchanged++;
+    if(samples++<16)fprintf(stderr,"[nvn-vulkan] TEXTURE_UNCHANGED_REUSE serial=%llu format=%u extent=%u,%u levels=%u layers=%u encoded_bytes=%llu cpu_owned=%d tracked=%d\n",(unsigned long long)t->serial,source->d.format,t->width,t->height,source->d.levels,source->L.layers,(unsigned long long)source->L.size,t->cpu_owned,nvn_dirty_tracked(source->mem,source->L.size));
+    return 1;
+}
 static void refresh_compressed_cpu(VTexture *t,const tex_t *source) {
     uint64_t started=dm_android_nvn_clock_ns(),stamp=nvn_dirty_now();nvn_dirty_protect(source->mem,source->L.size);
+    if(texture_snapshot_unchanged(t,source,stamp))return;
+    if(t->cpu_snapshot_bytes!=source->L.size)die("streamed BC snapshot extent changed",source->serial);
     uint8_t *snapshot=malloc(source->L.size);if(!snapshot)die("streamed BC snapshot allocation",source->L.size);
     memcpy(snapshot,source->mem,source->L.size);
     unsigned changed_regions=0;
@@ -1276,7 +1291,7 @@ static void refresh_compressed_cpu(VTexture *t,const tex_t *source) {
         all_barrier();texture_transition(t,VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);vkCmdCopyBufferToImage(S.command,staging->b,t->image,t->layout,count,regions);changed_regions+=count;
         free(regions);free(old);free(next);
     }
-    free(t->cpu_snapshot);t->cpu_snapshot=snapshot;t->upload_stamp=stamp;
+    free(t->cpu_snapshot);t->cpu_snapshot=snapshot;t->cpu_snapshot_bytes=source->L.size;t->upload_stamp=stamp;
     if(changed_regions){tex_dirty(t);G.uploads++;fprintf(stderr,"[nvn-vulkan] BC_STREAM_REFRESH serial=%llu changed_regions=%u gpu_blocks_preserved=1\n",(unsigned long long)t->serial,changed_regions);}
     G.profile_decode_ns+=dm_android_nvn_clock_ns()-started;
 }
@@ -1363,9 +1378,12 @@ upload_existing:
         // Protect before reading and stamp before protection: any later CPU
         // write is newer than this snapshot, even if it races the upload.
         uint64_t stamp=nvn_dirty_now();nvn_dirty_protect(source->mem,source->L.size);
+        /* CPU-owned BC images already retain their encoded baseline. Page
+         * dirtiness alone must not trigger another full deswizzle/decode. */
+        if(upload_bc&&texture_snapshot_unchanged(t,source,stamp))return t;
         const uint8_t *upload_memory=source->mem;
         if(upload_bc){uint8_t *snapshot=malloc(source->L.size);if(!snapshot)die("BC CPU baseline snapshot allocation",source->L.size);
-            memcpy(snapshot,source->mem,source->L.size);free(t->cpu_snapshot);t->cpu_snapshot=snapshot;upload_memory=snapshot;}
+            memcpy(snapshot,source->mem,source->L.size);free(t->cpu_snapshot);t->cpu_snapshot=snapshot;t->cpu_snapshot_bytes=source->L.size;upload_memory=snapshot;}
         all_barrier();texture_transition(t,VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
         uint64_t decode_start=dm_android_nvn_clock_ns();
         for(unsigned layer=0;layer<source->L.layers;layer++)for(unsigned level=0;level<source->d.levels;level++) {
@@ -1382,7 +1400,9 @@ upload_existing:
             VkBufferImageCopy copy={.imageSubresource={upload_aspect,level,layer,1},.imageExtent={w,h,z}};
             vkCmdCopyBufferToImage(S.command,staging->b,t->image,VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,1,&copy);
         }
-        G.profile_decode_ns+=dm_android_nvn_clock_ns()-decode_start;
+        uint64_t decode_ns=dm_android_nvn_clock_ns()-decode_start;G.profile_decode_ns+=decode_ns;
+        if(decode_ns>5000000){static unsigned samples;
+            if(samples++<16)fprintf(stderr,"[nvn-vulkan] TEXTURE_SLOW_UPLOAD serial=%llu format=%u extent=%u,%u levels=%u layers=%u encoded_bytes=%llu decode_ms=%.3f tracked=%d\n",(unsigned long long)t->serial,source->d.format,t->width,t->height,source->d.levels,source->L.layers,(unsigned long long)source->L.size,decode_ns/1e6,nvn_dirty_tracked(source->mem,source->L.size));}
         t->cpu_owned=1;t->upload_stamp=stamp;tex_dirty(t); G.uploads++;
     }
     return t;
@@ -3217,6 +3237,8 @@ uint64_t mtl_present(const tex_t *source,double period,const int crop[4]) {
     if(G.trace_frame || G.profile_frames>=60 || G.present_count<2){uint64_t now=dm_android_nvn_clock_ns();
         double elapsed_ms=(now-G.profile_start_ns)/1e6;
         double fps=elapsed_ms>0?1000.0*G.profile_frames/elapsed_ms:0;
+        fprintf(stderr,"[nvn-vulkan] RENDER_TEXTURE_SNAPSHOT_PROFILE frame=%llu candidates=%llu unchanged=%llu compared_bytes=%llu\n",(unsigned long long)G.present_count+1,(unsigned long long)G.profile_texture_candidates,(unsigned long long)G.profile_texture_unchanged,(unsigned long long)G.profile_texture_compare_bytes);
+        G.profile_texture_candidates=G.profile_texture_unchanged=G.profile_texture_compare_bytes=0;
         fprintf(stderr,"[nvn-vulkan] RENDER_PROFILE frame=%llu frames=%llu fps=%.3f elapsed_ms=%.3f pipeline_ms=%.3f gpu_wait_ms=%.3f upload_decode_ms=%.3f submits=%llu draws=%llu\n",(unsigned long long)G.present_count+1,(unsigned long long)G.profile_frames,fps,elapsed_ms,G.profile_pipeline_ns/1e6,G.profile_wait_ns/1e6,G.profile_decode_ns/1e6,(unsigned long long)G.profile_submits,(unsigned long long)(G.draws-G.profile_draws));
         fprintf(stderr,"[nvn-vulkan] RENDER_SUBMIT_CLASS_PROFILE frame=%llu total_submits=%llu observed_eligible_candidates=%llu candidate_fence_wait_ms=%.3f pool_writeback_bytes=%llu events=%llu counter_reports=%llu write_submits=%llu event_submits=%llu report_submits=%llu trace_submits=%llu cpu_readback_submits=%llu event_wait_submits=%llu\n",(unsigned long long)G.present_count+1,(unsigned long long)G.profile_submits,(unsigned long long)G.profile_submit_candidates,G.profile_candidate_wait_ns/1e6,(unsigned long long)G.profile_writeback_bytes,(unsigned long long)G.profile_events,(unsigned long long)G.profile_reports,(unsigned long long)G.profile_write_submits,(unsigned long long)G.profile_event_submits,(unsigned long long)G.profile_report_submits,(unsigned long long)G.profile_trace_submits,(unsigned long long)G.profile_cpu_readback_submits,(unsigned long long)G.profile_event_wait_submits);
         fprintf(stderr,"[nvn-vulkan] RENDER_CPU_PROFILE frame=%llu lookup_ms=%.3f pool_ms=%.3f bind_ms=%.3f renderpass_ms=%.3f present_ms=%.3f desc_alloc_ms=%.3f desc_update_ms=%.3f prep_ms=%.3f\n",(unsigned long long)G.present_count+1,G.profile_lookup_ns/1e6,G.profile_pool_ns/1e6,G.profile_bind_ns/1e6,G.profile_render_ns/1e6,G.profile_present_ns/1e6,G.profile_desc_alloc_ns/1e6,G.profile_desc_update_ns/1e6,G.profile_prep_ns/1e6);
