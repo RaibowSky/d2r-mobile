@@ -1,0 +1,38 @@
+name: Touchable iPad source shell
+on:
+  push:
+    branches: [codex/touchable-ipad-build]
+  workflow_dispatch:
+    inputs:
+      layout:
+        description: Module section dimensions only, as JSON; no game bytes
+        required: true
+        type: string
+      shader_chain:
+        description: Local shader tool fingerprint
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: macos-26
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Build pinned Touchable without game content or signing
+        env:
+          TOUCHABLE_LAYOUT: >-
+            ${{ inputs.layout || '{"main":{"text_end":10906608,"patch_off":19595264,"key_page_off":19562496,"size":19985280},"sdk":{"text_end":6672640,"patch_off":12845056,"key_page_off":12812288,"size":13458356}}' }}
+          TOUCHABLE_SHADER_CHAIN: ${{ inputs.shader_chain || '3f16e11f0f95' }}
+        run: python3 tools/build_touchable_shell.py --output "$RUNNER_TEMP/touchable-source"
+      - name: Save data-free shell
+        uses: actions/upload-artifact@v4
+        with:
+          name: touchable-ipad-source-shell
+          path: |
+            ${{ runner.temp }}/touchable-source/Touchable-source-shell.zip
+            ${{ runner.temp }}/touchable-source/build-report.json
+          retention-days: 3
